@@ -1,4 +1,34 @@
-import parcels
-import trucks
+from packages.packages import Packages
+from trucks.trucks import Trucks
+from locations.locations import Locations
+from hash.hash import HashTable
 import csv
+
+if __name__ == '__main__':
+    # testing hash table
+    hash_table = HashTable(10)  # TODO:  Change size to 100
+    hash_table.insert('hello', 'world')
+    hash_table.insert('ChatGPW', (10, 20))
+
+    hash2 = HashTable(3)
+    hash2.insert('max', 100)
+    hash2.insert('min', 10)
+    hash2.insert('location', 'Super Main street')
+
+    hash_table.insert(123, hash2.get_all())
+    # print(hash_table.get_value('ChatGPW'))
+    # for h in hash_table.get_all():
+    #     print(h)
+
+    # testing locations
+    locations = Locations()
+    locations.add_all_locations('data/distance_table.csv')
+    # for l in locations.get_locations():
+    #     print(l)
+
+    for location in locations.get_locations():
+        print(f'current location == {location}')
+        for x in location.get_adjacency_list():
+            print((str(x[0]), x[1]))
+
 
