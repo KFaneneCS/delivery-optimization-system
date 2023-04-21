@@ -35,7 +35,6 @@ class HashTable:
         self.num_nodes += 1
 
         if self.num_nodes / self.table_size >= self.load_factor:
-            print(f'rehash triggered on {value}')   # TODO:  Remove
             self.rehash()
 
         return new_node

@@ -1,5 +1,5 @@
 class Location:
-    def __init__(self, address, zip_code):
+    def __init__(self, address=None, zip_code=None):
         self.address = address
         self.zip_code = zip_code
         self.adjacency_list = []

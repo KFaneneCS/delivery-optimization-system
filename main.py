@@ -2,6 +2,7 @@ from packages.packages import Packages
 from trucks.trucks import Trucks
 from locations.locations import Locations
 from hash.hash import HashTable
+from graph.graph import Graph
 import csv
 
 if __name__ == '__main__':
@@ -23,12 +24,15 @@ if __name__ == '__main__':
     # testing locations
     locations = Locations()
     locations.add_all_locations('data/distance_table.csv')
+
     # for l in locations.get_locations():
     #     print(l)
 
-    for location in locations.get_locations():
-        print(f'current location == {location}')
-        for x in location.get_adjacency_list():
-            print((str(x[0]), x[1]))
+    # for location in locations.get_all_locations():
+    #     print(f'current location == {location}')
+    #     for x in location.get_adjacency_list():
+    #         print((str(x[0]), x[1]))
+
+
 
 
