@@ -10,7 +10,7 @@ class Graph:
     def add_vertex(self, node):
         return self.vertices.append(node)
 
-    def add_edge(self, source, target, weight):
+    def add_weighted_edge(self, source, target, weight):
         self.adjacencies.insert(source.get_address(), (target, weight))
         self.adjacencies.insert(target.get_address(), (source, weight))
         return self.adjacencies

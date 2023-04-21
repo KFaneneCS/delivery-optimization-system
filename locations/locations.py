@@ -76,7 +76,7 @@ class Locations:
             for adj_tuple in source_loc.get_adjacency_list():
                 target_loc = adj_tuple[0].value
                 weight = adj_tuple[1]
-                self.graph.add_edge(source_loc, target_loc, weight)
+                self.graph.add_weighted_edge(source_loc, target_loc, weight)
         self.graph.show_all_connections()
 
 
