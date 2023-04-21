@@ -22,7 +22,7 @@ class HashTable:
         return h % self.table_size
 
     def insert(self, key, value):
-        hashed_key = self._generate_hash(str(key))
+        hashed_key = self._generate_hash(key)
         curr_node = self.table[hashed_key]
         new_node = HashNode(key, value)
 

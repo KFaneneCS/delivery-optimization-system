@@ -67,16 +67,17 @@ class Locations:
                 # Adding weighted adjacency tuple to source and target nodes' adjacency lists
                 source_node = self.locations_hash.lookup(source_address)
                 target_node = self.locations_hash.lookup(target_address)
-                source_node.value.add_adjacent(target_node.value, weight)
-                target_node.value.add_adjacent(source_node.value, weight)
+                source_node.value.add_adjacent(target_node, weight)
+                target_node.value.add_adjacent(source_node, weight)
 
     def add_all_vertices_and_edges(self):
         for source_loc in self.get_all_locations():
             self.graph.add_vertex(source_loc)
             for adj_tuple in source_loc.get_adjacency_list():
-                target_loc = adj_tuple[0]
+                target_loc = adj_tuple[0].value
                 weight = adj_tuple[1]
                 self.graph.add_edge(source_loc, target_loc, weight)
+        self.graph.show_all_connections()
 
 
 
