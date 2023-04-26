@@ -82,12 +82,6 @@ class Locations:
                 # print(f'target loc: {target_loc}, weight {weight}')
                 self.graph.add_weighted_edge(source_node.value, target_loc, weight)
 
-        self.graph.show_all_connections()
-
-
-
-
-
 
         # addresses = []
         # zip_codes = []

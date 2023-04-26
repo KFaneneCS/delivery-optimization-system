@@ -16,9 +16,8 @@ class HashTable:
         self.load_factor = load_factor
 
     def items(self):
-        for node in self.table:
-            if node:
-                yield node.key, node.value
+        for node in self.get_all():
+            yield node.key, node.value
 
     def _generate_hash(self, key):
         h = 0
