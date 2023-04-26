@@ -4,7 +4,7 @@ class HashNode:
         self.value = value
         self.next = None
 
-    def __str__(self):
+    def __repr__(self):
         return f'HashNode(key={self.key} | value={self.value})'
 
 
@@ -15,13 +15,18 @@ class HashTable:
         self.num_nodes = 0
         self.load_factor = load_factor
 
+    def items(self):
+        for node in self.table:
+            if node:
+                yield node.key, node.value
+
     def _generate_hash(self, key):
         h = 0
         for char in str(key):
             h += ord(char)
         return h % self.table_size
 
-    def insert(self, key, value):
+    def add(self, key, value):
         hashed_key = self._generate_hash(key)
         curr_node = self.table[hashed_key]
         new_node = HashNode(key, value)
@@ -53,26 +58,26 @@ class HashTable:
                 while node:
                     key = node.key
                     hashed_key = self._generate_hash(key)
-                    self.insert(hashed_key, node)
+                    self.add(hashed_key, node)
                     node = node.next
 
-    def delete(self, key):
-        hashed_key = self._generate_hash(str(key))
+    def delete(self, unhashed_key):
+        hashed_key = self._generate_hash(str(unhashed_key))
         curr_node = self.table[hashed_key]
 
         while curr_node:
-            if curr_node.key == key:
+            if curr_node.key == unhashed_key:
+                self.num_nodes -= 1
                 return curr_node
         return None
 
-    def lookup(self, key):
-        hashed_key = self._generate_hash(str(key))
+    def get_node(self, unhashed_key):
+        hashed_key = self._generate_hash(str(unhashed_key))
         if self.table[hashed_key] is None:
             return None
-
         curr_node = self.table[hashed_key]
         while curr_node:
-            if curr_node.key == key:
+            if curr_node.key == unhashed_key:
                 return curr_node
             curr_node = curr_node.next
         return None

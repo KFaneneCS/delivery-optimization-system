@@ -17,20 +17,19 @@ def read_csv(csv_file):
 class Locations:
 
     def __init__(self):
-        self.locations = []
-        self.locations_hash = HashTable(50)
+        self.locations_table = HashTable(60)
         self.graph = Graph()
 
     def get_location(self, address):
-        return self.locations_hash.lookup(address)
+        return self.locations_table.get_node(address)
 
     def get_all_locations(self):
-        return [hash_obj.value for hash_obj in self.locations_hash.get_all()]
+        return [loc_node.value for loc_node in self.locations_table.get_all()]
 
     def add(self, address, zip_code):
-        self.locations.append(address)
         new_loc = Location(address, zip_code)
-        return self.locations_hash.insert(address, new_loc)
+        # key = 'HUB' if new_loc.get_key() == 'HUB' else key = new_loc.get_key()
+        return self.locations_table.add(new_loc.get_key(), new_loc)
 
     def add_all_locations(self, csv_file):
         data = read_csv(csv_file)
@@ -58,25 +57,31 @@ class Locations:
     def add_adjacencies_from_data(self, data):
         for row in range(1, len(data)):
             source_address = data[row][0].split('(')[0].strip()
+            source_node = self.locations_table.get_node(source_address)
+            count = 0
             for col in range(1, len(data[0])):
+                count += 1
                 target_address = data[0][col].split('(')[0].strip()
                 weight = float(data[row][col])
                 # Once we hit "0.0," we are doubly referencing an address, so we move on to the next row
                 if weight == 0.0:
                     break
+
+                target_node = self.locations_table.get_node(target_address)
                 # Adding weighted adjacency tuple to source and target nodes' adjacency lists
-                source_node = self.locations_hash.lookup(source_address)
-                target_node = self.locations_hash.lookup(target_address)
-                source_node.value.add_adjacent(target_node, weight)
-                target_node.value.add_adjacent(source_node, weight)
+                source_node.value.add_adjacent(target_node.value, weight)
+                target_node.value.add_adjacent(source_node.value, weight)
 
     def add_all_vertices_and_edges(self):
-        for source_loc in self.get_all_locations():
-            self.graph.add_vertex(source_loc)
-            for adj_tuple in source_loc.get_adjacency_list():
-                target_loc = adj_tuple[0].value
+        for location in self.get_all_locations():
+            self.graph.add_vertex(location)
+        for source_node in self.locations_table.get_all():
+            for adj_tuple in source_node.value.get_adjacency_list():
+                target_loc = adj_tuple[0]
                 weight = adj_tuple[1]
-                self.graph.add_weighted_edge(source_loc, target_loc, weight)
+                # print(f'target loc: {target_loc}, weight {weight}')
+                self.graph.add_weighted_edge(source_node.value, target_loc, weight)
+
         self.graph.show_all_connections()
 
 
