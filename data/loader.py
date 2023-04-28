@@ -25,7 +25,8 @@ class Loader:
         return full_addresses[2:]
 
     def extract_address_zip_pairs(self):
-        for full in self.full_addresses:
+        self.full_addresses.insert(0, ('HUB', '84107'))
+        for full in self.full_addresses[1:]:
             address = full.split('(')[0].strip()
             zip_code = full.split('(')[1][:5]
             yield address, zip_code
@@ -33,6 +34,7 @@ class Loader:
     def extract_source_target_weights(self):
         # Adding the addresses from the first column to the first row of our data
         self.data.insert(0, self.full_addresses)
+
 
         for row in range(1, len(self.data)):
             source_address = self.data[row][0].split('(')[0].strip()

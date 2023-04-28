@@ -31,4 +31,3 @@ class Graph:
             for edge in edge_list:
                 print(f'  -> {edge[0].get_key()} | {edge[1]} miles')
         return
-

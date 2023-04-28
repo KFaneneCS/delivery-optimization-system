@@ -10,10 +10,15 @@ import csv
 if __name__ == '__main__':
     csv_file = 'data/distance_table.csv'
     locations = Locations(csv_file)
-    # hub = 'HUB'
-    # graph = locations.get_graph()
-    #
-    # dijkstra = Dijkstra(hub, graph)
+    hub = 'HUB'
+    for x in locations.get_all_locations():
+        print(x.get_adjacency_list())
+
+    graph = locations.get_graph()
+
+    dijkstra = Dijkstra(hub, graph)
+    dijkstra.execute()
+
 
 
 

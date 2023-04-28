@@ -14,16 +14,6 @@ class Locations:
         self.loader = Loader(self.distance_table_csv)
         self.add_all_locations()
 
-    def get_location(self, address):
-        return self.locations_table.get_node(address).value
-
-    def get_all_locations(self):
-        return [loc_node.value for loc_node in self.locations_table.get_all()]
-
-    def add(self, address, zip_code):
-        new_loc = Location(address, zip_code)
-        return self.locations_table.add(new_loc.get_key(), new_loc)
-
     def add_all_locations(self):
         # Manually entering our Hub information with address as "HUB" for clarity
         self.add('HUB', '84107')
@@ -49,6 +39,15 @@ class Locations:
                 weight = adj_tuple[1]
                 self.graph.add_weighted_edge(source_node.value, target_loc, weight)
 
+    def get_location(self, address):
+        return self.locations_table.get_node(address).value
+
+    def get_all_locations(self):
+        return [loc_node.value for loc_node in self.locations_table.get_all()]
+
+    def add(self, address, zip_code):
+        new_loc = Location(address, zip_code)
+        return self.locations_table.add(new_loc.get_key(), new_loc)
+
     def get_graph(self):
         return self.graph
-
