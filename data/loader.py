@@ -6,6 +6,7 @@ class Loader:
         self.csv_file = csv_file
         self.data = self.load_csv_data()
         self.full_addresses = self.extract_full_addresses()
+        self.address_zip_pairs = self.extract_address_zip_pairs()
 
     def load_csv_data(self):
         if self.csv_file.lower().endswith('.csv'):
@@ -16,32 +17,46 @@ class Loader:
             raise ValueError('Extension must be .csv')
 
     def extract_full_addresses(self):
+        # FIXME:  Redo this comment to reflect changes
         # First element is an empty space to represent first empty cell of the data
-        full_addresses = ['']
+        full_addresses = ['HUB\n(84107)']
         # Getting the first column of the data which contains each address without the name of the location
         first_col = list(map(list, zip(*self.data)))[0]
-        for col_address in first_col:
+        for col_address in first_col[1:]:
             full_addresses.append(col_address)
-        return full_addresses[2:]
+        return full_addresses
 
     def extract_address_zip_pairs(self):
-        self.full_addresses.insert(0, ('HUB', '84107'))
-        for full in self.full_addresses[1:]:
+        # self.full_addresses.insert(0, ('HUB', '84107'))
+        pairs = []
+        for full in self.full_addresses:
             address = full.split('(')[0].strip()
             zip_code = full.split('(')[1][:5]
-            yield address, zip_code
+            pairs.append((address, zip_code))
+        return pairs
 
     def extract_source_target_weights(self):
-        # Adding the addresses from the first column to the first row of our data
-        self.data.insert(0, self.full_addresses)
-
-
-        for row in range(1, len(self.data)):
-            source_address = self.data[row][0].split('(')[0].strip()
-            for col in range(1, len(self.data[0])):
-                target_address = self.data[0][col].split('(')[0].strip()
-                weight = float(self.data[row][col])
-                # Once we hit "0.0," we are doubly referencing an address, so we move on to the next row
+        for source_index, tuple_val in enumerate(self.address_zip_pairs):
+            source_address = tuple_val[0]
+            for target_index in range(len(self.data)):
+                target_address = self.address_zip_pairs[target_index][0]
+                weight = float(self.data[source_index][target_index + 1])
                 if weight == 0.0:
                     break
                 yield source_address, target_address, weight
+
+    def get_address_zip_pairs(self):
+        return self.address_zip_pairs
+
+        # # Adding the addresses from the first column to the first row of our data
+        # self.data.insert(0, self.full_addresses)
+        #
+        # for row in range(1, len(self.data)):
+        #     source_address = self.data[row][0].split('(')[0].strip()
+        #     for col in range(1, len(self.data[0])):
+        #         target_address = self.data[0][col].split('(')[0].strip()
+        #         weight = float(self.data[row][col])
+        #         # Once we hit "0.0," we are doubly referencing an address, so we move on to the next row
+        #         if weight == 0.0:
+        #             break
+        #         yield source_address, target_address, weight

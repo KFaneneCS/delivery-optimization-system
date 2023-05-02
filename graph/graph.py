@@ -1,3 +1,4 @@
+import networkx as nx
 from hash.hash import HashTable
 import bisect
 
@@ -7,12 +8,16 @@ class Graph:
         self.graph = HashTable(60)
         self.size = 0
 
+    def get_hashed_graph(self):
+        return self.graph
+
     def add_vertex(self, vertex):
         self.graph.add(vertex, [])
         self.size += 1
 
     def add_weighted_edge(self, source, target, weight):
-        source_node = self.graph.get_node(source.get_key())
+        # Graph node with address as key and (target location, weight) tuple as value
+        source_node = self.graph.get_node(source)
         source_tuple = (target, weight)
 
         # TODO:  May or may not need this sorted - come back to this later
@@ -21,6 +26,10 @@ class Graph:
 
     def get_all_vertices(self):
         return [vertex for vertex, edge_list in self.graph.items()]
+
+    def get_weighted_edges(self, loc_object):
+        vertex = self.graph.get_node(loc_object.get_key())
+        return vertex.value
 
     def get_size(self):
         return self.size

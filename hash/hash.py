@@ -88,3 +88,6 @@ class HashTable:
             while node:
                 yield node
                 node = node.next
+
+    def print_all(self):
+        print([node for node in self.get_all()])
