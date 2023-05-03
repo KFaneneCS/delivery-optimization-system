@@ -21,6 +21,14 @@ class PriorityQueue:
             i = (i - 1) // 2
         return self
 
+    def change_priority(self, priority, information):
+        for i, node in enumerate(self.queue):
+            if node.info == information:
+                node.pr = priority
+                self.heapify(i, len(self.queue))
+                return self
+        return None
+
     # TODO:  Cite "https://www.programiz.com/dsa/heap-data-structure#heapify"
     def heapify(self, i, n):
         smallest = i
