@@ -1,6 +1,5 @@
-import math
-from queue import Queue
-from hash.hash import HashTable
+from data_structures.hash import HashTable
+from data_structures.priority_queue import PriorityQueue
 
 
 class Dijkstra:
@@ -9,16 +8,47 @@ class Dijkstra:
         self.start = start
         self.destination = destination
         self.graph = graph
+        self.start_edges = self.graph.get_weighted_edges(self.start)
         # self.dist_queue = Queue()
         self.dist_table = HashTable(self.graph.get_size() * 2)
+        self.priority_queue = PriorityQueue()
         # self.visited = set()
+        self.unvisited = set()
         self.initialize()
 
     def initialize(self):
-        self.dist_table.add(self.start, 0)
-        for vertex, value in self.graph.get_hashed_graph().items():
-            self.dist_table.add(vertex, math.inf)
-        print(f'DISTANCE TABLE:   {self.dist_table.print_all()}')
+        start_weight, prev_vertex = 0, None
+        self.dist_table.add_node(self.start, (start_weight, prev_vertex))
+
+        for vertex, weight in self.start_edges:
+            self.dist_table.add_node(unhashed_key=vertex, value=(weight, self.start))
+            self.priority_queue.insert(priority=weight, information=vertex)
+            self.unvisited.add(vertex)
+
+    def execute(self):
+        while self.unvisited:
+            current = self.priority_queue.get()
+            curr_min_dist = self.get_dist_and_prev(current)[0]
+            for neighbor_tuple in self.graph.get_weighted_edges(current):
+                neighbor = neighbor_tuple[0]
+                if neighbor in self.unvisited:
+                    neighbor_dist_from_curr = neighbor_tuple[1]
+                    neighbor_dist_from_start = self.get_dist_and_prev(neighbor)[0]
+                    if curr_min_dist + neighbor_dist_from_curr < neighbor_dist_from_start:
+                        new_min_dist = curr_min_dist + neighbor_dist_from_curr
+                        self.dist_table.change_node(neighbor, (new_min_dist, current))
+            self.unvisited.remove(current)
+
+                    # neighbor_dist_from_start = self.get_distance(neighbor)
+                # print(f'    Neighbor={neighbor} || Distance={neighbor_dist_from_start}')
+
+    def get_dist_and_prev(self, target):
+        node = self.dist_table.get_node(target)
+        weight = node[0]
+        prev = node[1]
+        return weight, prev
+
+
 
         # for tuple_val in self.graph.get_weighted_edges(self.start):
         #     self.dist_queue.put(tuple_val)
@@ -32,12 +62,10 @@ class Dijkstra:
         #         self.dist_table.add(vertex, math.inf)
         #     self.vertex_list.append(vertex)
 
-    def get_distance(self, target):
-        return
-        # return self.dist_table.get_node(target)
 
-    def execute(self):
-        return
+
+    # def execute(self):
+    #     return
         # while not self.v_queue.qsize() == 0:
         #     min_vertex = min(self.vertex_list, key=lambda x: self.dist_table.get_node(x).value)
         #     min_index = self.vertex_list.index(min_vertex)

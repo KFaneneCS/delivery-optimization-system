@@ -1,7 +1,7 @@
 from graph.dijkstra import Dijkstra
 from data.loader import Loader
 from .location import Location
-from hash.hash import HashTable
+from data_structures.hash import HashTable
 from graph.graph import Graph
 
 
@@ -46,7 +46,7 @@ class Locations:
 
     def add(self, address, zip_code):
         new_loc = Location(address, zip_code)
-        return self.locations_table.add(new_loc.get_key(), new_loc)
+        return self.locations_table.add_node(new_loc.get_key(), new_loc)
 
     def get_graph(self):
         return self.graph

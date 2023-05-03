@@ -1,5 +1,5 @@
 import networkx as nx
-from hash.hash import HashTable
+from data_structures.hash import HashTable
 import bisect
 
 
@@ -12,23 +12,23 @@ class Graph:
         return self.graph
 
     def add_vertex(self, vertex):
-        self.graph.add(vertex, [])
+        self.graph.add_node(vertex, [])
         self.size += 1
 
     def add_weighted_edge(self, source, target, weight):
         # Graph node with address as key and (target location, weight) tuple as value
         source_node = self.graph.get_node(source)
         source_tuple = (target, weight)
+        source_node.value.append(source_tuple)
 
-        # TODO:  May or may not need this sorted - come back to this later
-        bisect.insort(source_node.value, source_tuple, key=lambda x: x[1])
+        # bisect.insort(source_node.value, source_tuple, key=lambda x: x[1])    # FIXME:  remove?
         return self.graph
 
     def get_all_vertices(self):
         return [vertex for vertex, edge_list in self.graph.items()]
 
     def get_weighted_edges(self, loc_object):
-        vertex = self.graph.get_node(loc_object.get_key())
+        vertex = self.graph.get_node(loc_object)
         return vertex.value
 
     def get_size(self):

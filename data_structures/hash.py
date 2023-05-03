@@ -19,16 +19,16 @@ class HashTable:
         for node in self.get_all():
             yield node.key, node.value
 
-    def _generate_hash(self, key):
+    def _generate_hash(self, unhashed_key):
         h = 0
-        for char in str(key):
+        for char in str(unhashed_key):
             h += ord(char)
         return h % self.table_size
 
-    def add(self, key, value):
-        hashed_key = self._generate_hash(key)
+    def add_node(self, unhashed_key, value):
+        hashed_key = self._generate_hash(unhashed_key)
         curr_node = self.table[hashed_key]
-        new_node = HashNode(key, value)
+        new_node = HashNode(unhashed_key, value)
 
         if curr_node is None:
             self.table[hashed_key] = new_node
@@ -57,15 +57,20 @@ class HashTable:
                 while node:
                     key = node.key
                     hashed_key = self._generate_hash(key)
-                    self.add(hashed_key, node)
+                    self.add_node(hashed_key, node)
                     node = node.next
 
     def delete(self, unhashed_key):
         hashed_key = self._generate_hash(str(unhashed_key))
         curr_node = self.table[hashed_key]
+        prev_node = None
 
         while curr_node:
             if curr_node.key == unhashed_key:
+                if not prev_node:
+                    self.table[hashed_key] = curr_node.next
+                else:
+                    prev_node.next = curr_node.next
                 self.num_nodes -= 1
                 return curr_node
         return None
@@ -80,6 +85,10 @@ class HashTable:
                 return curr_node
             curr_node = curr_node.next
         return None
+
+    def change_node(self, unhashed_key, new_value):
+        self.delete(unhashed_key)
+        self.add_node(unhashed_key, new_value)
 
     def get_all(self):
         for node in self.table:

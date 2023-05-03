@@ -1,3 +1,5 @@
+import bisect
+
 class Location:
     def __init__(self, address=None, zip_code=None):
         self.address = address
@@ -11,7 +13,8 @@ class Location:
         return f'{self.address}'
 
     def add_adjacent(self, target, weight):
-        self.adjacency_list.append((target, weight))
+        bisect.insort(self.adjacency_list, (target, weight), key=lambda x: x[1])
+        # self.adjacency_list.append((target, weight))
         return self
 
     def get_adjacency_list(self):
