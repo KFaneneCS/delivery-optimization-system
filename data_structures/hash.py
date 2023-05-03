@@ -55,9 +55,7 @@ class HashTable:
                 pass
             else:
                 while node:
-                    key = node.key
-                    hashed_key = self._generate_hash(key)
-                    self.add_node(hashed_key, node)
+                    self.add_node(node.key, node.value)
                     node = node.next
 
     def delete(self, unhashed_key):
@@ -65,6 +63,8 @@ class HashTable:
         curr_node = self.table[hashed_key]
         prev_node = None
 
+        if curr_node is None:
+            raise KeyError(f'Key {unhashed_key} not found.')
         while curr_node:
             if curr_node.key == unhashed_key:
                 if not prev_node:
@@ -87,8 +87,11 @@ class HashTable:
         return None
 
     def change_node(self, unhashed_key, new_value):
-        self.delete(unhashed_key)
-        self.add_node(unhashed_key, new_value)
+        node = self.get_node(unhashed_key)
+        if node is not None:
+            node.value = new_value
+        else:
+            self.add_node(unhashed_key, new_value)
 
     def get_all(self):
         for node in self.table:

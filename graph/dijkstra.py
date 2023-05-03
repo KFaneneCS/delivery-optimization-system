@@ -10,7 +10,7 @@ class Dijkstra:
         self.graph = graph
         self.start_edges = self.graph.get_weighted_edges(self.start)
         # self.dist_queue = Queue()
-        self.dist_table = HashTable(self.graph.get_size() * 2)
+        self.dist_table = HashTable()
         self.priority_queue = PriorityQueue()
         # self.visited = set()
         self.unvisited = set()
@@ -26,26 +26,36 @@ class Dijkstra:
             self.unvisited.add(vertex)
 
     def execute(self):
+        print(f'START LOCATION: {self.start}')
         while self.unvisited:
+            print(f'\nNumber of unvisited: {len(self.unvisited)}')
+            print(f'   Current in queue:  {self.priority_queue.peek()}')
+            print(f'       In unvisited? ~{self.priority_queue.peek() in self.unvisited}')
             current = self.priority_queue.get()
             curr_min_dist = self.get_dist_and_prev(current)[0]
+            print(f" Current's distance from source = {curr_min_dist}")
+            COUNT = 0
             for neighbor_tuple in self.graph.get_weighted_edges(current):
                 neighbor = neighbor_tuple[0]
+
                 if neighbor in self.unvisited:
+                    COUNT += 1
+
                     neighbor_dist_from_curr = neighbor_tuple[1]
+                    print(f' * Neighbor: {neighbor}')
                     neighbor_dist_from_start = self.get_dist_and_prev(neighbor)[0]
+                    print(f'        From current: {neighbor_dist_from_curr} | From start: {neighbor_dist_from_start}')
                     if curr_min_dist + neighbor_dist_from_curr < neighbor_dist_from_start:
+                        print(f'      UPDATING distance to neighbor node')
                         new_min_dist = curr_min_dist + neighbor_dist_from_curr
                         self.dist_table.change_node(neighbor, (new_min_dist, current))
+            print(f' ~~ number of neighbors visited:  {COUNT}')
             self.unvisited.remove(current)
-
-                    # neighbor_dist_from_start = self.get_distance(neighbor)
-                # print(f'    Neighbor={neighbor} || Distance={neighbor_dist_from_start}')
 
     def get_dist_and_prev(self, target):
         node = self.dist_table.get_node(target)
-        weight = node[0]
-        prev = node[1]
+        weight = node.value[0]
+        prev = node.value[1]
         return weight, prev
 
 
