@@ -9,7 +9,7 @@ class HashNode:
 
 
 class HashTable:
-    def __init__(self, table_size: int = 30, load_factor: float = 0.75):
+    def __init__(self, table_size: int = 37, load_factor: float = 0.75):
         self.table_size = table_size
         self.table = [None] * self.table_size
         self.num_nodes = 0

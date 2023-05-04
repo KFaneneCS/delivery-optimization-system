@@ -7,4 +7,4 @@ class Package:
         self.city = city
         self.zip_code = zip_code
         self.mass = mass
-        self.status = 'at the hub'
+        self.status = "At hub"

@@ -1,5 +1,5 @@
 from data_structures.hash import HashTable
-from data_structures.priority_queue import PriorityQueue
+from data_structures.priority_queue import MinPriorityQueue
 
 
 class Dijkstra:
@@ -9,10 +9,11 @@ class Dijkstra:
         self.graph = graph
         self.start_edges = self.graph.get_weighted_edges(self.start)
         self.dist_table = HashTable()
-        self.priority_queue = PriorityQueue()
+        self.priority_queue = MinPriorityQueue()
         self.unvisited = set()
         self.visited = set()
         self.initialize()
+        self.execute()
 
     def initialize(self):
         if self.start not in self.graph.get_all_vertices():
@@ -24,43 +25,39 @@ class Dijkstra:
             self.dist_table.add_node(unhashed_key=vertex, value=(weight, self.start))
             self.priority_queue.insert(priority=weight, information=vertex)
             self.unvisited.add(vertex)
-        self.execute()
 
     def execute(self):
-        # print(f'START LOCATION: {self.start}')
         while self.unvisited:
             # print(f'\nNumber of unvisited: {len(self.unvisited)}')
+            curr_node = self.priority_queue.get()
+            # print(f'   Current in queue:  {curr_node}')
+            # print(f'       In unvisited? ~{curr_node in self.unvisited}')
+            min_dist_to_curr = self.get_dist_and_prev(curr_node)[0]
+            # print(f" Current's distance from source = {min_dist_to_curr}")
 
-            current = self.priority_queue.get()
-            # print(f'   Current in queue:  {current}')
-            # print(f'       In unvisited? ~{current in self.unvisited}')
-            curr_min_dist = self.get_dist_and_prev(current)[0]
-            # print(f" Current's distance from source = {curr_min_dist}")
+            for edge_to_neighbor in self.graph.get_weighted_edges(curr_node):
+                neighbor_node = edge_to_neighbor[0]
 
-            for neighbor_tuple in self.graph.get_weighted_edges(current):
-                neighbor = neighbor_tuple[0]
+                if neighbor_node not in self.visited:
+                    dist_neighbor_to_curr = edge_to_neighbor[1]
+                    # print(f' * Neighbor: {neighbor_node}')
+                    dist_start_to_curr = self.get_dist_and_prev(neighbor_node)[0]
+                    # print(f'        From curr_node: {dist_neighbor_to_curr} | From start: {dist_start_to_curr}')
+                    if min_dist_to_curr + dist_neighbor_to_curr < dist_start_to_curr:
+                        # print(f'*****UPDATING***** distance to neighbor_node node')
+                        new_min_dist = min_dist_to_curr + dist_neighbor_to_curr
+                        self.dist_table.change_node(unhashed_key=neighbor_node, new_value=(new_min_dist, curr_node))
+                        self.priority_queue.change_priority(priority=new_min_dist, information=neighbor_node)
 
-                if neighbor not in self.visited:
-                    neighbor_dist_from_curr = neighbor_tuple[1]
-                    # print(f' * Neighbor: {neighbor}')
-                    neighbor_dist_from_start = self.get_dist_and_prev(neighbor)[0]
-                    # print(f'        From current: {neighbor_dist_from_curr} | From start: {neighbor_dist_from_start}')
-                    if curr_min_dist + neighbor_dist_from_curr < neighbor_dist_from_start:
-                        # print(f'                         *****UPDATING***** distance to neighbor node')
-                        new_min_dist = curr_min_dist + neighbor_dist_from_curr
-                        self.dist_table.change_node(neighbor, (new_min_dist, current))
-                        self.priority_queue.change_priority(priority=new_min_dist, information=neighbor)
-
-            self.unvisited.remove(current)
-            self.visited.add(current)
+            self.unvisited.remove(curr_node)
+            self.visited.add(curr_node)
         return
 
     def get_shortest_path(self, target_location):
-        # print(f'START:  {self.start} ----> TARGET:  {target_location}')
         path = []
         target_node = self.dist_table.get_node(target_location)
-        shortest_distance = target_node.value[0]
-        path.append((target_node.key, shortest_distance))
+        shortest_dist = target_node.value[0]
+        path.append((target_node.key, shortest_dist))
         prev_loc = target_node.value[1]
 
         while prev_loc:

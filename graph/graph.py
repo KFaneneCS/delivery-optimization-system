@@ -20,8 +20,6 @@ class Graph:
         source_node = self.graph.get_node(source)
         source_tuple = (target, weight)
         source_node.value.append(source_tuple)
-
-        # bisect.insort(source_node.value, source_tuple, key=lambda x: x[1])    # FIXME:  remove?
         return self.graph
 
     def get_all_vertices(self):

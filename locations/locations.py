@@ -1,5 +1,5 @@
 from graph.dijkstra import Dijkstra
-from data.loader import Loader
+from data.locations_loader import LocationsLoader
 from .location import Location
 from data_structures.hash import HashTable
 from graph.graph import Graph
@@ -11,31 +11,29 @@ class Locations:
         self.distance_table_csv = distance_table_csv
         self.locations_table = HashTable(60)
         self.graph = Graph()
-        self.loader = Loader(self.distance_table_csv)
+        self.loader = LocationsLoader(self.distance_table_csv)
         self.add_all_locations()
         self.add_adjacencies_from_data()
         self.add_all_vertices_and_edges()
 
     def add_all_locations(self):
-        # # Manually entering our Hub information with address as "HUB" for clarity
-        # self.add('HUB', '84107')
         for address, zip_code in self.loader.get_address_zip_pairs():
             self.add(address, zip_code)
 
     def add_adjacencies_from_data(self):
-        for source, target, weight in self.loader.extract_source_target_weights():
-            source_node = self.locations_table.get_node(source)
-            target_node = self.locations_table.get_node(target)
-            source_node.value.add_adjacent(target_node.value, weight)
-            target_node.value.add_adjacent(source_node.value, weight)
+        for source_location, target_location, distance in self.loader.extract_source_target_weights():
+            source_node = self.locations_table.get_node(source_location)
+            target_node = self.locations_table.get_node(target_location)
+            source_node.value.add_adjacent(target_node.value, distance)
+            target_node.value.add_adjacent(source_node.value, distance)
 
     def add_all_vertices_and_edges(self):
         for loc_object in self.get_all_locations():
             self.graph.add_vertex(loc_object)
         for source_node in self.locations_table.get_all():
-            for adj_tuple in source_node.value.get_adjacency_list():
-                target_loc = adj_tuple[0]
-                weight = adj_tuple[1]
+            for adjacency_info in source_node.value.get_adjacency_list():
+                target_loc = adjacency_info[0]
+                weight = adjacency_info[1]
                 self.graph.add_weighted_edge(source_node.value, target_loc, weight)
 
     def get_location(self, address):

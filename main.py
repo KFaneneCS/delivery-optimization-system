@@ -2,7 +2,8 @@ from packages.packages import Packages
 from trucks.trucks import Trucks
 from locations.locations import Locations
 from data_structures.hash import HashTable
-from data_structures.priority_queue import PriorityQueue
+from data_structures.priority_queue import MinPriorityQueue
+from statistics import mean
 
 from graph.graph import Graph
 from graph.dijkstra import Dijkstra
@@ -20,4 +21,5 @@ if __name__ == '__main__':
     # graph.show_all_connections()
 
     dijkstra = Dijkstra(start_location, graph)
-    print(dijkstra.get_shortest_path(target_location))
+
+    packages = Packages()
