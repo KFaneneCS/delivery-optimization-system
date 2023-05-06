@@ -1,5 +1,6 @@
 from data_structures.hash import HashTable
 from data_structures.priority_queue import MinPriorityQueue
+import typing
 
 
 class Dijkstra:
@@ -9,6 +10,7 @@ class Dijkstra:
         self.graph = graph
         self.start_edges = self.graph.get_weighted_edges(self.start)
         self.dist_table = HashTable()
+        self.final_paths = HashTable()
         self.priority_queue = MinPriorityQueue()
         self.unvisited = set()
         self.visited = set()
@@ -51,9 +53,11 @@ class Dijkstra:
 
             self.unvisited.remove(curr_node)
             self.visited.add(curr_node)
-        return
+        return self
 
     def get_shortest_path(self, target_location):
+        if self.final_paths.has_node(target_location):
+            return self.final_paths.get_node(target_location).value
         path = []
         target_node = self.dist_table.get_node(target_location)
         shortest_dist = target_node.value[0]
@@ -66,6 +70,7 @@ class Dijkstra:
             prev_loc = prev_node.value[1]
 
         path.reverse()
+        self.final_paths.add_node(target_location, path)
         return path
 
     def get_dist_and_prev(self, target):
@@ -73,3 +78,14 @@ class Dijkstra:
         weight = node.value[0]
         prev = node.value[1]
         return weight, prev
+
+    def get_distance_table(self):
+        return self.dist_table
+
+    def get_max_distance(self):
+        max_distance = 0.0
+        for location, dist_to_neighbor in self.dist_table.items():
+            curr_distance = dist_to_neighbor[0]
+            if curr_distance > max_distance:
+                max_distance = curr_distance
+        return max_distance

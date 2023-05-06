@@ -86,6 +86,15 @@ class HashTable:
             curr_node = curr_node.next
         return None
 
+    def has_node(self, unhashed_key):
+        hashed_key = self._generate_hash(str(unhashed_key))
+        curr_node = self.table[hashed_key]
+        while curr_node:
+            if curr_node.key == unhashed_key:
+                return True
+            curr_node = curr_node.next
+        return False
+
     def change_node(self, unhashed_key, new_value):
         node = self.get_node(unhashed_key)
         if node is not None:

@@ -12,22 +12,22 @@ class Locations:
         self.locations_table = HashTable(60)
         self.graph = Graph()
         self.loader = LocationsLoader(self.distance_table_csv)
-        self.add_all_locations()
-        self.add_adjacencies_from_data()
-        self.add_all_vertices_and_edges()
+        self._add_all_locations()
+        self._add_adjacencies_from_data()
+        self._add_all_vertices_and_edges()
 
-    def add_all_locations(self):
+    def _add_all_locations(self):
         for address, zip_code in self.loader.get_address_zip_pairs():
             self.add(address, zip_code)
 
-    def add_adjacencies_from_data(self):
+    def _add_adjacencies_from_data(self):
         for source_location, target_location, distance in self.loader.extract_source_target_weights():
             source_node = self.locations_table.get_node(source_location)
             target_node = self.locations_table.get_node(target_location)
             source_node.value.add_adjacent(target_node.value, distance)
             target_node.value.add_adjacent(source_node.value, distance)
 
-    def add_all_vertices_and_edges(self):
+    def _add_all_vertices_and_edges(self):
         for loc_object in self.get_all_locations():
             self.graph.add_vertex(loc_object)
         for source_node in self.locations_table.get_all():
@@ -36,15 +36,15 @@ class Locations:
                 weight = adjacency_info[1]
                 self.graph.add_weighted_edge(source_node.value, target_loc, weight)
 
+    def add(self, address, zip_code):
+        new_loc = Location(address.strip(), zip_code)
+        return self.locations_table.add_node(new_loc.get_key(), new_loc)
+
     def get_location(self, address):
         return self.locations_table.get_node(address.strip()).value
 
     def get_all_locations(self):
         return [loc_node.value for loc_node in self.locations_table.get_all()]
-
-    def add(self, address, zip_code):
-        new_loc = Location(address.strip(), zip_code)
-        return self.locations_table.add_node(new_loc.get_key(), new_loc)
 
     def get_graph(self):
         return self.graph

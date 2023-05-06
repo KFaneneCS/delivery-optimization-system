@@ -14,7 +14,7 @@ class Location:
         return f'{self.address}'
 
     def add_adjacent(self, target, weight):
-        bisect.insort(self.adjacency_list, (target, weight), key=lambda x: x[1])
+        bisect.insort(self.adjacency_list, (target, weight), key=lambda adj: adj[1])
         return self
 
     def get_adjacency_list(self):

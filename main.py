@@ -4,22 +4,29 @@ from locations.locations import Locations
 from data_structures.hash import HashTable
 from data_structures.priority_queue import MinPriorityQueue
 from statistics import mean
+from priority_logic import priority_logic
+import datetime
 
 from graph.graph import Graph
 from graph.dijkstra import Dijkstra
 
-import csv
-
 if __name__ == '__main__':
-    csv_file = 'data/distance_table.csv'
-    locations = Locations(csv_file)
+    locations_file = 'data/distance_table.csv'
+    packages_file = 'data/package_file.csv'
+    locations = Locations(locations_file)
 
-    start_location = locations.get_location('HUB')
+    hub = locations.get_location('HUB')
     target_location = locations.get_location('2010 W 500 S')
     graph = locations.get_graph()
 
     # graph.show_all_connections()
 
-    dijkstra = Dijkstra(start_location, graph)
+    shortest_paths = Dijkstra(hub, graph)
+    print(f'longest distance from HUB:  {shortest_paths.get_max_distance()}')
 
-    packages = Packages()
+    packages = Packages(packages_file, shortest_paths)
+
+    # t1 = datetime.time(9, 0)
+    # print(priority_logic.get_package_weight(5, t1, shortest_paths.get_max_distance()))
+
+
