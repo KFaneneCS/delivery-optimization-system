@@ -10,12 +10,13 @@ class Dijkstra:
         self.graph = graph
         self.start_edges = self.graph.get_weighted_edges(self.start)
         self.dist_table = HashTable()
-        self.final_paths = HashTable()
+        self.all_paths = HashTable()
         self.priority_queue = MinPriorityQueue()
         self.unvisited = set()
         self.visited = set()
         self.initialize()
         self.execute()
+        self.find_all_shortest_paths()
 
     def initialize(self):
         if self.start not in self.graph.get_all_vertices():
@@ -47,7 +48,7 @@ class Dijkstra:
                     # print(f'        From curr_node: {dist_neighbor_to_curr} | From start: {dist_start_to_curr}')
                     if min_dist_to_curr + dist_neighbor_to_curr < dist_start_to_curr:
                         # print(f'*****UPDATING***** distance to neighbor_node node')
-                        new_min_dist = min_dist_to_curr + dist_neighbor_to_curr
+                        new_min_dist = round(min_dist_to_curr + dist_neighbor_to_curr, ndigits=1)
                         self.dist_table.change_node(unhashed_key=neighbor_node, new_value=(new_min_dist, curr_node))
                         self.priority_queue.change_priority(priority=new_min_dist, information=neighbor_node)
 
@@ -55,9 +56,15 @@ class Dijkstra:
             self.visited.add(curr_node)
         return self
 
+    def find_all_shortest_paths(self):
+        for target_location, _ in self.dist_table.items():
+            self.get_shortest_path(target_location)
+        return self
+
     def get_shortest_path(self, target_location):
-        if self.final_paths.has_node(target_location):
-            return self.final_paths.get_node(target_location).value
+        if self.all_paths.has_node(target_location):
+            return self.all_paths.get_node(target_location).value
+
         path = []
         target_node = self.dist_table.get_node(target_location)
         shortest_dist = target_node.value[0]
@@ -70,7 +77,7 @@ class Dijkstra:
             prev_loc = prev_node.value[1]
 
         path.reverse()
-        self.final_paths.add_node(target_location, path)
+        self.all_paths.add_node(target_location, path)
         return path
 
     def get_dist_and_prev(self, target):
@@ -79,7 +86,7 @@ class Dijkstra:
         prev = node.value[1]
         return weight, prev
 
-    def get_distance_table(self):
+    def get_dist_table(self):
         return self.dist_table
 
     def get_max_distance(self):

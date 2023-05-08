@@ -22,9 +22,13 @@ if __name__ == '__main__':
     # graph.show_all_connections()
 
     shortest_paths = Dijkstra(hub, graph)
-    print(f'longest distance from HUB:  {shortest_paths.get_max_distance()}')
+    # print(f'longest distance from HUB:  {shortest_paths.get_max_distance()}')
+    # print(shortest_paths.get_shortest_path(target_location))
+    # print('\n\n\n')
+    # for x in shortest_paths.get_dist_table().get_all():
+    #     print(x)
 
-    packages = Packages(packages_file, shortest_paths)
+    packages = Packages(packages_file, shortest_paths, locations)
 
     # t1 = datetime.time(9, 0)
     # print(priority_logic.get_package_weight(5, t1, shortest_paths.get_max_distance()))

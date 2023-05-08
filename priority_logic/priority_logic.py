@@ -9,18 +9,16 @@ MAX_TIME_VALUE = 16.0
 RELATIVE_WEIGHT = 0.5
 
 
-def get_package_weight(distance, deadline: datetime.time, max_distance_value):
+def get_package_weight(distance: float, deadline: datetime.time, max_distance_value: float):
     if distance < 0 or not isinstance(distance, (int, float)):
         raise ValueError('Invalid distance value provided.')
     # The number of miles between the HUB and its farthest delivery location per Dijkstra
     if max_distance_value < 0 or not isinstance(max_distance_value, (int, float)):
         raise ValueError('Invalid max distance value provided.')
-    if not isinstance(deadline, (str, datetime.time)):
-        raise ValueError('Invalid deadline value provided.')
 
     # Close of business is at 5pm
     closing = datetime.time(17, 0)
-    if deadline == 'EOD':
+    if deadline is None:
         deadline_value = 0
     else:
         # Each 30 min. increment before 5pm adds a weight unit of 1

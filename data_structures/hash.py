@@ -1,4 +1,4 @@
-class HashNode:
+class _HashNode:
     def __init__(self, key, value):
         self.key = key
         self.value = value
@@ -28,7 +28,7 @@ class HashTable:
     def add_node(self, unhashed_key, value):
         hashed_key = self._generate_hash(unhashed_key)
         curr_node = self.table[hashed_key]
-        new_node = HashNode(unhashed_key, value)
+        new_node = _HashNode(unhashed_key, value)
 
         if curr_node is None:
             self.table[hashed_key] = new_node

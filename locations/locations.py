@@ -38,7 +38,7 @@ class Locations:
 
     def add(self, address, zip_code):
         new_loc = Location(address.strip(), zip_code)
-        return self.locations_table.add_node(new_loc.get_key(), new_loc)
+        self.locations_table.add_node(new_loc.get_key(), new_loc)
 
     def get_location(self, address):
         return self.locations_table.get_node(address.strip()).value
