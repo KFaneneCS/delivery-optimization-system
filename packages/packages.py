@@ -20,7 +20,7 @@ class Packages:
         for dataset in self.loader.get_data():
             try:
                 package_id = int(dataset[0])
-                address = dataset[1]
+                address = self.locations.get_location(dataset[1].strip())
                 city = dataset[2]
                 state = dataset[3]
                 zip_code = dataset[4]
@@ -39,9 +39,9 @@ class Packages:
         #
 
         for package in self.packages:
-            destination = self.locations.get_location(package.get_destination())
+            destination = package.get_destination()
             print(f'DEST:   {destination}')
-            print(self.shortest_paths.get_dist_table().get_node(destination))
+            # print(self.shortest_paths.get_dist_table().get_node(destination))
             distance = self.shortest_paths.get_dist_table().get_node(destination).value[0]
             deadline = package.get_deadline()
             priority_value = priority_logic.get_package_weight(distance, deadline, max_distance)

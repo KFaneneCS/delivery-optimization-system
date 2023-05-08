@@ -1,34 +1,39 @@
 from data_structures.priority_queue import MaxPriorityQueue
 from packages.package import Package
-import datetime
+import datetime as dt
 
-# The maximum value attributed to the difference between 5pm closing and the delivery deadline, where each 30 minute
-# increment receives a unit value of 1.0, up to 9am (1 hour after opening and the earliest delivery time)
-MAX_TIME_VALUE = 16.0
-# A value representing the relative importance of distance versus delivery deadline (50% for both)
-RELATIVE_WEIGHT = 0.5
+# Weighting coefficient
+RELATIVE_WEIGHT = 0.25
 
 
-def get_package_weight(distance: float, deadline: datetime.time, max_distance_value: float):
-    if distance < 0 or not isinstance(distance, (int, float)):
-        raise ValueError('Invalid distance value provided.')
-    # The number of miles between the HUB and its farthest delivery location per Dijkstra
-    if max_distance_value < 0 or not isinstance(max_distance_value, (int, float)):
-        raise ValueError('Invalid max distance value provided.')
+def get_package_weight(distance: float, deadline: dt.time, max_distance_value: float, opening: dt.time = dt.time(8, 0),
+                       closing: dt.time = dt.time(17, 0)):
+    assert isinstance(distance, (int, float)) and distance >= 0, 'Invalid distance value provided.'
+    assert isinstance(max_distance_value, (int, float)) and max_distance_value >= 0, 'Invalid max distance value ' \
+                                                                                     'provided. '
+    assert isinstance(opening, dt.time) and isinstance(closing, dt.time), 'Invalid opening and/or closing time ' \
+                                                                          'provided. '
 
-    # Close of business is at 5pm
-    closing = datetime.time(17, 0)
+    # Number of half-hour increments between opening and closing
+    time_diff = ((closing.hour - opening.hour) * 60 + (closing.minute - opening.minute)) / 30
+    # Removing 2 half-hour increments to account for earliest delivery time of 1 hour after opening
+    max_time_value = time_diff - 2.0
+
     if deadline is None:
         deadline_value = 0
     else:
-        # Each 30 min. increment before 5pm adds a weight unit of 1
-        d1 = datetime.datetime(2020, 1, 1, deadline.hour, deadline.minute)
-        d2 = datetime.datetime(2020, 1, 1, closing.hour, closing.minute)
-        diff = d2 - d1
-        deadline_value = diff / datetime.timedelta(minutes=30)
+        # TODO:  Cite: https://stackoverflow.com/questions/8474670/pythonic-way-to-combine-datetime-date-and-datetime-time-objects
+        diff = dt.datetime.combine(dt.date.today(), closing) - dt.datetime.combine(dt.date.today(), deadline)
+        deadline_value = diff / dt.timedelta(minutes=30)
 
-    package_weight = ((1 - (distance / max_distance_value)) * RELATIVE_WEIGHT) \
-        + (1 - (deadline_value / MAX_TIME_VALUE) * RELATIVE_WEIGHT)
+    dist_weight = 1 - (distance / max_distance_value)
+    time_weight = 1 - ((max_time_value - deadline_value) / max_time_value)
+    package_weight = (dist_weight * RELATIVE_WEIGHT) + (time_weight * (1 - RELATIVE_WEIGHT))
+
+    # FIXME: testing
+    if package_weight == 0:
+        print(f'***Distance: {distance},  Deadline: {deadline},  DL Value: {deadline_value}')
+
     return package_weight
 
 

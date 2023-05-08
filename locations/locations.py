@@ -41,7 +41,14 @@ class Locations:
         self.locations_table.add_node(new_loc.get_key(), new_loc)
 
     def get_location(self, address):
-        return self.locations_table.get_node(address.strip()).value
+        try:
+            return self.locations_table.get_node(address.strip()).value
+        except AttributeError:
+            for location in self.get_all_locations():
+                full_address = location.get_key()
+                if address.startswith(full_address[:5]):
+                    return location
+            return None
 
     def get_all_locations(self):
         return [loc_node.value for loc_node in self.locations_table.get_all()]
