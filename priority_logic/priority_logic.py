@@ -30,10 +30,6 @@ def get_package_weight(distance: float, deadline: dt.time, max_distance_value: f
     time_weight = 1 - ((max_time_value - deadline_value) / max_time_value)
     package_weight = (dist_weight * RELATIVE_WEIGHT) + (time_weight * (1 - RELATIVE_WEIGHT))
 
-    # FIXME: testing
-    if package_weight == 0:
-        print(f'***Distance: {distance},  Deadline: {deadline},  DL Value: {deadline_value}')
-
     return package_weight
 
 
