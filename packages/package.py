@@ -4,33 +4,61 @@ import datetime
 
 
 class Package:
-    def __init__(self, id_: int, destination: Location, deadline: datetime, kilos: int, requirements: str):
-        self.id_ = id_
-        self.destination = destination
-        self.deadline = deadline
-        self.kilos = kilos
-        self.requirements = requirements
-        self.priority = None
+    def __init__(self, id_: int, destination: Location, deadline: datetime, kilos: int, notes: str):
+        self._id = id_
+        self._destination = destination
+        self._deadline = deadline
+        self._kilos = kilos
+        self._notes = notes
+        self._truck_id = None
+        self._delayed = False
+        self._priority = None
 
-    def __repr__(self):
-        return f'Package(ID={self.id_} | destination={self.destination} | deadline={self.deadline} | ' \
-               f'priority={self.priority})'
+    def __str__(self):
+        return f'Package(ID={self._id} | destination={self.destination} | deadline={self._deadline} | ' \
+               f'priority={self._priority})'
 
-    def get_id(self):
-        return self.id_
+    # TODO:  Cite:  https://stackoverflow.com/questions/2627002/whats-the-pythonic-way-to-use-getters-and-setters
+    @property
+    def id(self):
+        return self._id
 
-    def get_destination(self):
-        return self.destination
+    @property
+    def destination(self):
+        return self._destination
 
-    def get_deadline(self):
-        return self.deadline
+    @property
+    def deadline(self):
+        return self._deadline
 
-    def get_special_notes(self):
-        return self.requirements
+    @property
+    def special_notes(self):
+        return self._notes
 
-    def get_priority(self):
-        return self.priority
+    @property
+    def priority(self):
+        return self._priority
 
-    def set_priority(self, priority_value: float):
-        self.priority = priority_value
-        return self.priority
+    @priority.setter
+    def priority(self, priority_value: float):
+        self._priority = priority_value
+
+    @property
+    def truck_id(self):
+        return self._truck_id
+
+    @truck_id.setter
+    def truck_id(self, truck_id: int):
+        if truck_id < 0:
+            raise ValueError('Invalid truck ID value.')
+        self._truck_id = truck_id
+
+    @property
+    def delayed(self):
+        return self._delayed
+
+    @delayed.setter
+    def delayed(self, is_delayed: bool):
+        self._delayed = is_delayed
+
+

@@ -1,11 +1,35 @@
 class _HashNode:
     def __init__(self, key, value):
-        self.key = key
-        self.value = value
-        self.next = None
+        self._key = key
+        self._value = value
+        self._next = None
 
     def __repr__(self):
         return f'HashNode(key={self.key} | value={self.value})'
+
+    @property
+    def key(self):
+        return self._key
+
+    @key.setter
+    def key(self, key):
+        self._key = key
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, val):
+        self._value = val
+
+    @property
+    def next(self):
+        return self._next
+
+    @next.setter
+    def next(self, next):
+        self._next = next
 
 
 class HashTable:

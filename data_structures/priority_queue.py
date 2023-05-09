@@ -1,7 +1,7 @@
 class QueueNode:
     def __init__(self, priority, information):
-        self.pr = priority
-        self.info = information if information is not None else priority
+        self.priority = priority
+        self.information = information if information is not None else priority
 
 
 class MinPriorityQueue:
@@ -16,15 +16,15 @@ class MinPriorityQueue:
 
         self.queue.append(new_node)
         i = len(self.queue) - 1
-        while i > 0 and self.queue[i].pr <= self.queue[(i - 1) // 2].pr:
+        while i > 0 and self.queue[i].priority <= self.queue[(i - 1) // 2].priority:
             self.queue[i], self.queue[(i - 1) // 2] = self.queue[(i - 1) // 2], self.queue[i]
             i = (i - 1) // 2
         return self
 
     def change_priority(self, priority, information):
         for i, node in enumerate(self.queue):
-            if node.info == information:
-                node.pr = priority
+            if node.information == information:
+                node.priority = priority
                 self.heapify(i, len(self.queue))
                 return self
         return None
@@ -35,9 +35,9 @@ class MinPriorityQueue:
         left = (2 * i) + 1
         right = (2 * i) + 2
 
-        if left < n and self.queue[left].pr < self.queue[smallest].pr:
+        if left < n and self.queue[left].priority < self.queue[smallest].priority:
             smallest = left
-        if right < n and self.queue[right].pr < self.queue[smallest].pr:
+        if right < n and self.queue[right].priority < self.queue[smallest].priority:
             smallest = right
 
         if smallest != i:
@@ -50,16 +50,16 @@ class MinPriorityQueue:
 
         root = self.queue[0]
         if len(self.queue) == 1:
-            return self.queue.pop().info
+            return self.queue.pop().information
         # Swap root with last element
         n = len(self.queue)
         self.queue[0], self.queue[n - 1] = self.queue[n - 1], self.queue[0]
         self.queue.pop()
         self.heapify(0, n - 1)
-        return root.info
+        return root.information
 
     def peek(self):
-        return self.queue[0].info
+        return self.queue[0].information
 
     def is_empty(self):
         return len(self.queue) == 0
@@ -77,15 +77,15 @@ class MaxPriorityQueue:
 
         self.queue.append(new_node)
         i = len(self.queue) - 1
-        while i > 0 and self.queue[i].pr >= self.queue[(i - 1) // 2].pr:
+        while i > 0 and self.queue[i].priority >= self.queue[(i - 1) // 2].priority:
             self.queue[i], self.queue[(i - 1) // 2] = self.queue[(i - 1) // 2], self.queue[i]
             i = (i - 1) // 2
         return self
 
     def change_priority(self, priority, information):
         for i, node in enumerate(self.queue):
-            if node.info == information:
-                node.pr = priority
+            if node.information == information:
+                node.priority = priority
                 self.heapify(i, len(self.queue))
                 return self
         return None
@@ -95,9 +95,9 @@ class MaxPriorityQueue:
         left = (2 * i) + 1
         right = (2 * i) + 2
 
-        if left < n and self.queue[left].pr > self.queue[largest].pr:
+        if left < n and self.queue[left].priority > self.queue[largest].priority:
             largest = left
-        if right < n and self.queue[right].pr > self.queue[largest].pr:
+        if right < n and self.queue[right].priority > self.queue[largest].priority:
             largest = right
 
         if largest != i:
@@ -110,16 +110,16 @@ class MaxPriorityQueue:
 
         root = self.queue[0]
         if len(self.queue) == 1:
-            return self.queue.pop().info
+            return self.queue.pop().information
         # Swap root with last element
         n = len(self.queue)
         self.queue[0], self.queue[n - 1] = self.queue[n - 1], self.queue[0]
         self.queue.pop()
         self.heapify(0, n - 1)
-        return root.info
+        return root.information
 
     def peek(self):
-        return self.queue[0].info
+        return self.queue[0].information
 
     def is_empty(self):
         return len(self.queue) == 0

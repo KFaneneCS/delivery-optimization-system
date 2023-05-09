@@ -6,7 +6,15 @@ import bisect
 class Graph:
     def __init__(self):
         self.graph = HashTable(60)
-        self.size = 0
+        self._size = 0
+
+    @property
+    def size(self):
+        return self._size
+
+    @size.setter
+    def size(self, size_val):
+        self._size = size_val
 
     def get_hashed_graph(self):
         return self.graph
@@ -28,9 +36,6 @@ class Graph:
     def get_weighted_edges(self, loc_object):
         vertex = self.graph.get_node(loc_object)
         return vertex.value
-
-    def get_size(self):
-        return self.size
 
     def show_all_connections(self):
         for location, edge_list in self.graph.items():

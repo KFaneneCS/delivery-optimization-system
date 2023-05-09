@@ -9,7 +9,7 @@ class Dijkstra:
         self.start = start
         self.graph = graph
         self.start_edges = self.graph.get_weighted_edges(self.start)
-        self.dist_table = HashTable()
+        self._dist_table = HashTable()
         self.all_paths = HashTable()
         self.priority_queue = MinPriorityQueue()
         self.unvisited = set()
@@ -61,6 +61,10 @@ class Dijkstra:
             self.get_shortest_path(target_location)
         return self
 
+    @property
+    def dist_table(self):
+        return self._dist_table
+
     def get_shortest_path(self, target_location):
         if self.all_paths.has_node(target_location):
             return self.all_paths.get_node(target_location).value
@@ -85,9 +89,6 @@ class Dijkstra:
         weight = node.value[0]
         prev = node.value[1]
         return weight, prev
-
-    def get_dist_table(self):
-        return self.dist_table
 
     def get_max_distance(self):
         max_distance = 0.0

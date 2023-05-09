@@ -31,7 +31,7 @@ class Locations:
         for loc_object in self.get_all_locations():
             self.graph.add_vertex(loc_object)
         for source_node in self.locations_table.get_all():
-            for adjacency_info in source_node.value.get_adjacency_list():
+            for adjacency_info in source_node.value.adjacency_list:
                 target_loc = adjacency_info[0]
                 weight = adjacency_info[1]
                 self.graph.add_weighted_edge(source_node.value, target_loc, weight)
