@@ -29,6 +29,8 @@ if __name__ == '__main__':
     #     print(x)
 
     packages = Packages(packages_file, shortest_paths, locations)
+    trucks = Trucks(3, 2)
+    trucks.load_packages(packages.get_packages())
 
     # t1 = datetime.time(9, 0)
     # print(priority_logic.get_package_weight(5, t1, shortest_paths.get_max_distance()))

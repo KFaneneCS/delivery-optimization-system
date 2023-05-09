@@ -1,5 +1,6 @@
 from data_structures.priority_queue import MaxPriorityQueue
 from packages.package import Package
+from typing import List
 import datetime as dt
 
 # Weighting coefficient
@@ -28,10 +29,14 @@ def get_package_weight(distance: float, deadline: dt.time, max_distance_value: f
 
     dist_weight = 1 - (distance / max_distance_value)
     time_weight = 1 - ((max_time_value - deadline_value) / max_time_value)
-    package_weight = (dist_weight * RELATIVE_WEIGHT) + (time_weight * (1 - RELATIVE_WEIGHT))
+    package_weight = round((dist_weight * RELATIVE_WEIGHT) + (time_weight * (1 - RELATIVE_WEIGHT)), 3)
 
     return package_weight
 
 
-def prioritize_packages(packages):
-    return
+def prioritize_packages(packages: List[Package]):
+    queue = MaxPriorityQueue()
+    for package in packages:
+        priority = package.get_priority()
+        queue.insert(priority=priority, information=package)
+    return queue
