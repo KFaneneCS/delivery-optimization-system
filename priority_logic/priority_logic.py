@@ -9,11 +9,12 @@ RELATIVE_WEIGHT = 0.25
 
 def get_package_weight(distance: float, deadline: dt.time, max_distance_value: float, opening: dt.time = dt.time(8, 0),
                        closing: dt.time = dt.time(17, 0)):
-    assert isinstance(distance, (int, float)) and distance >= 0, 'Invalid distance value provided.'
-    assert isinstance(max_distance_value, (int, float)) and max_distance_value >= 0, 'Invalid max distance value ' \
-                                                                                     'provided. '
-    assert isinstance(opening, dt.time) and isinstance(closing, dt.time), 'Invalid opening and/or closing time ' \
-                                                                          'provided. '
+    if not isinstance(distance, (int, float)) or distance < 0:
+        raise ValueError('Invalid "distance" value.')
+    if not isinstance(max_distance_value, (int, float)) or max_distance_value < 0:
+        raise ValueError('Invalid "max distance value".')
+    if not isinstance(opening, dt.time) or not isinstance(closing, dt.time):
+        raise ValueError('Invalid "opening" and/or "closing" time value.')
 
     # Number of half-hour increments between opening and closing
     time_diff = ((closing.hour - opening.hour) * 60 + (closing.minute - opening.minute)) / 30
@@ -28,15 +29,15 @@ def get_package_weight(distance: float, deadline: dt.time, max_distance_value: f
         deadline_value = diff / dt.timedelta(minutes=30)
 
     dist_weight = 1 - (distance / max_distance_value)
-    time_weight = 1 - ((max_time_value - deadline_value) / max_time_value)
+    time_weight = deadline_value / max_time_value
     package_weight = round((dist_weight * RELATIVE_WEIGHT) + (time_weight * (1 - RELATIVE_WEIGHT)), 3)
 
     return package_weight
 
 
-def prioritize_packages(packages: List[Package]):
-    queue = MaxPriorityQueue()
-    for package in packages:
-        priority = package.priority
-        queue.insert(priority=priority, information=package)
-    return queue
+# def prioritize_packages(packages: List[Package]):
+#     queue = MaxPriorityQueue()
+#     for package in packages:
+#         priority = package.priority
+#         queue.insert(priority=priority, information=package)
+#     return queue

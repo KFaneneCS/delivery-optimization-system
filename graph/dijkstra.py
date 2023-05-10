@@ -6,7 +6,7 @@ import typing
 class Dijkstra:
 
     def __init__(self, start, graph):
-        self.start = start
+        self._start = start
         self.graph = graph
         self.start_edges = self.graph.get_weighted_edges(self.start)
         self._dist_table = HashTable()
@@ -28,6 +28,10 @@ class Dijkstra:
             self.dist_table.add_node(unhashed_key=vertex, value=(weight, self.start))
             self.priority_queue.insert(priority=weight, information=vertex)
             self.unvisited.add(vertex)
+
+    @property
+    def start(self):
+        return self._start
 
     def execute(self):
         while self.unvisited:

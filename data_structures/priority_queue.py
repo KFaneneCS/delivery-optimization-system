@@ -10,7 +10,7 @@ class MinPriorityQueue:
 
     def insert(self, priority, information=None):
         if not isinstance(priority, (int, float)):
-            raise ValueError('Priority value must be an Integer or Float.')
+            raise ValueError('Invalid "priority" value.')
 
         new_node = QueueNode(priority, information)
 
@@ -71,7 +71,7 @@ class MaxPriorityQueue:
 
     def insert(self, priority, information=None):
         if not isinstance(priority, (int, float)):
-            raise ValueError('Priority value must be an Integer or Float.')
+            raise ValueError('Invalid "priority" value.')
 
         new_node = QueueNode(priority, information)
 

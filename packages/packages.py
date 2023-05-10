@@ -1,9 +1,6 @@
 import datetime
-
 from .package import Package
 from locations.locations import Locations
-from data_structures.priority_queue import MaxPriorityQueue
-from data_structures.hash import HashTable
 from data.packages_loader import PackagesLoader
 from graph.dijkstra import Dijkstra
 from priority_logic import priority_logic
@@ -11,11 +8,11 @@ from priority_logic import priority_logic
 
 class Packages:
     def __init__(self, package_csv: str, shortest_paths: Dijkstra, locations: Locations):
-        self.packages = []
+        self._packages = []
         self.loader = PackagesLoader(package_csv)
         self.shortest_paths = shortest_paths
         self.locations = locations
-        self.priority_queue = None
+        self._priority_queue = None
         self._add_all_packages()
         self._assign_priority_values()
 
@@ -46,8 +43,17 @@ class Packages:
 
         return self
 
-    def get_packages(self):
-        return self.packages
+    @property
+    def packages(self):
+        return self._packages
 
-    def get_priority_queue(self):
-        return self.priority_queue
+    @property
+    def priority_queue(self):
+        return self._priority_queue
+
+    # FIXME:  May not need this after all
+    def get_package_by_id(self, package_id):
+        for package in self.packages:
+            if package.id == package_id:
+                return package
+        return None

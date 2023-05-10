@@ -1,9 +1,10 @@
-from locations.location import Location
-from data_structures.hash import HashTable
 import datetime
+from locations.location import Location
 
 
 class Package:
+    STATUSES = ['At Hub', 'Delayed', 'In Transit', 'Delivered']
+
     def __init__(self, id_: int, destination: Location, deadline: datetime, kilos: int, notes: str):
         self._id = id_
         self._destination = destination
@@ -11,12 +12,13 @@ class Package:
         self._kilos = kilos
         self._notes = notes
         self._truck_id = None
-        self._delayed = False
+        self._wrong_address = False
         self._priority = None
+        self._status = Package.STATUSES[0]
 
     def __str__(self):
-        return f'Package(ID={self._id} | destination={self.destination} | deadline={self._deadline} | ' \
-               f'priority={self._priority})'
+        return f'Package(ID={self._id} | destination={self.destination} | deadline={self._deadline} |\n ' \
+               f'        priority={self._priority} | status={self._status})'
 
     # TODO:  Cite:  https://stackoverflow.com/questions/2627002/whats-the-pythonic-way-to-use-getters-and-setters
     @property
@@ -54,11 +56,23 @@ class Package:
         self._truck_id = truck_id
 
     @property
-    def delayed(self):
-        return self._delayed
+    def wrong_address(self):
+        return self._wrong_address
 
-    @delayed.setter
-    def delayed(self, is_delayed: bool):
-        self._delayed = is_delayed
+    @wrong_address.setter
+    def wrong_address(self, has_wrong_address: bool):
+        self._wrong_address = has_wrong_address
 
+    @classmethod
+    def get_statuses(cls):
+        return cls.STATUSES
 
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, new_status):
+        if new_status not in self.STATUSES:
+            raise ValueError(f'Invalid status: {new_status}.')
+        self._status = new_status
