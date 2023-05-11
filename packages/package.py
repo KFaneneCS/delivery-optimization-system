@@ -18,7 +18,7 @@ class Package:
 
     def __str__(self):
         return f'Package(ID={self._id} | destination={self.destination} | deadline={self._deadline} |\n ' \
-               f'        priority={self._priority} | status={self._status})'
+               f'        priority={self._priority} | status={self._status}) | truck={self._truck_id}'
 
     # TODO:  Cite:  https://stackoverflow.com/questions/2627002/whats-the-pythonic-way-to-use-getters-and-setters
     @property
