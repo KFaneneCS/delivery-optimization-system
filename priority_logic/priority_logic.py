@@ -38,6 +38,7 @@ def get_package_weight(distance: float, deadline: dt.time, max_distance_value: f
 def prioritize_packages(packages: List[Package]):
     queue = MaxPriorityQueue()
     for package in packages:
-        priority = package.priority
-        queue.insert(priority=priority, information=package)
+        if package.wrong_address:
+            package.priority = 0
+        queue.insert(priority=package.priority, information=package)
     return queue

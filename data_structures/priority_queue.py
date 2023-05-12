@@ -59,7 +59,16 @@ class MinPriorityQueue:
         return root.information
 
     def peek(self):
-        return self.queue[0].information
+        try:
+            return self.queue[0].information
+        except IndexError:
+            return None
+
+    def contains(self, information):
+        for i, node in enumerate(self.queue):
+            if node.information == information:
+                return True
+        return False
 
     def is_empty(self):
         return len(self.queue) == 0
@@ -119,7 +128,10 @@ class MaxPriorityQueue:
         return root.information
 
     def peek(self):
-        return self.queue[0].information
+        try:
+            return self.queue[0].information
+        except IndexError:
+            return None
 
     def is_empty(self):
         return len(self.queue) == 0

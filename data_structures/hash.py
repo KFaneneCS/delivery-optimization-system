@@ -34,45 +34,48 @@ class _HashNode:
 
 class HashTable:
     def __init__(self, table_size: int = 37, load_factor: float = 0.75):
-        self.table_size = table_size
-        self.table = [None] * self.table_size
-        self.num_nodes = 0
-        self.load_factor = load_factor
-
-    def items(self):
-        for node in self.get_all():
-            yield node.key, node.value
+        self._table_size = table_size
+        self._table = [None] * self._table_size
+        self._num_nodes = 0
+        self._load_factor = load_factor
 
     def _generate_hash(self, unhashed_key):
         h = 0
         for char in str(unhashed_key):
             h += ord(char)
-        return h % self.table_size
+        return h % self._table_size
+
+    def get_size(self):
+        return self._num_nodes
+
+    def items(self):
+        for node in self.get_all():
+            yield node.key, node.value
 
     def add_node(self, unhashed_key, value):
         hashed_key = self._generate_hash(unhashed_key)
-        curr_node = self.table[hashed_key]
+        curr_node = self._table[hashed_key]
         new_node = _HashNode(unhashed_key, value)
 
         if curr_node is None:
-            self.table[hashed_key] = new_node
+            self._table[hashed_key] = new_node
         else:
             while curr_node.next:
                 curr_node = curr_node.next
             curr_node.next = new_node
-        self.num_nodes += 1
+        self._num_nodes += 1
 
-        if self.num_nodes / self.table_size >= self.load_factor:
+        if self._num_nodes / self._table_size >= self._load_factor:
             self.rehash()
 
         return new_node
 
     def rehash(self):
-        temp_table = self.table
+        temp_table = self._table
 
-        self.table_size *= 2
-        self.table = [None] * self.table_size
-        self.num_nodes = 0
+        self._table_size *= 2
+        self._table = [None] * self._table_size
+        self._num_nodes = 0
 
         for node in temp_table:
             if node is None:
@@ -84,7 +87,7 @@ class HashTable:
 
     def delete(self, unhashed_key):
         hashed_key = self._generate_hash(str(unhashed_key))
-        curr_node = self.table[hashed_key]
+        curr_node = self._table[hashed_key]
         prev_node = None
 
         if curr_node is None:
@@ -92,18 +95,18 @@ class HashTable:
         while curr_node:
             if curr_node.key == unhashed_key:
                 if not prev_node:
-                    self.table[hashed_key] = curr_node.next
+                    self._table[hashed_key] = curr_node.next
                 else:
                     prev_node.next = curr_node.next
-                self.num_nodes -= 1
+                self._num_nodes -= 1
                 return curr_node
         return None
 
     def get_node(self, unhashed_key):
         hashed_key = self._generate_hash(str(unhashed_key))
-        if self.table[hashed_key] is None:
+        if self._table[hashed_key] is None:
             return None
-        curr_node = self.table[hashed_key]
+        curr_node = self._table[hashed_key]
         while curr_node:
             if curr_node.key == unhashed_key:
                 return curr_node
@@ -112,7 +115,7 @@ class HashTable:
 
     def has_node(self, unhashed_key):
         hashed_key = self._generate_hash(str(unhashed_key))
-        curr_node = self.table[hashed_key]
+        curr_node = self._table[hashed_key]
         while curr_node:
             if curr_node.key == unhashed_key:
                 return True
@@ -127,7 +130,7 @@ class HashTable:
             self.add_node(unhashed_key, new_value)
 
     def get_all(self):
-        for node in self.table:
+        for node in self._table:
             if not node:
                 pass
             while node:

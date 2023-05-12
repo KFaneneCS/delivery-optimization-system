@@ -1,6 +1,10 @@
 class Driver:
     def __init__(self, id_: int):
-        self.id_ = id_
+        self._id = id_
 
     def __str__(self):
-        return f'Driver(ID={self.id_})'
+        return f'Driver(ID={self.id})'
+
+    @property
+    def id(self):
+        return self._id

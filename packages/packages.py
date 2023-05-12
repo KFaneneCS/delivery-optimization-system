@@ -36,7 +36,7 @@ class Packages:
 
         for package in self.packages:
             destination = package.destination
-            distance = self.shortest_paths.dist_table.get_node(destination).value[0]
+            distance = self.shortest_paths.distance_table.get_node(destination).value[0]
             deadline = package.deadline
             priority_value = priority_logic.get_package_weight(distance, deadline, max_distance)
             package.priority = priority_value

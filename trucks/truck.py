@@ -2,6 +2,7 @@ from datetime import datetime, date, time, timedelta
 from locations.location import Location
 from packages.package import Package
 from data_structures.priority_queue import MaxPriorityQueue
+from data_structures.hash import HashTable
 from .driver import Driver
 
 
@@ -11,7 +12,10 @@ class Truck:
         self._id = id_
         self._driver = driver
         self._current_time = current_time
-        self._packages = MaxPriorityQueue()
+        self._miles_traveled = 0
+        self._packages_queue = MaxPriorityQueue()
+        self._locations_to_packages_table = HashTable()
+        self._cumulative_priority_value = 0
         self._delivered_packages = []
         self._return_time = None
         self._current_location = current_location
@@ -19,8 +23,12 @@ class Truck:
         self._current_capacity = self.MAX_CAPACITY
 
     def __str__(self):
-        return f'Truck(ID={self._id} | driver={self._driver} | ' \
-               f'location={self._current_location} | capacity={self._current_capacity})'
+        return f'''Truck ID={self.id}
+        Driver={self.driver}
+        Current Location={self.current_location.address}
+        Next Stop={self.packages_queue.peek()}
+        Return Time={self.return_time}
+        Capacity={self.current_capacity}'''
 
     @property
     def id(self):
@@ -41,8 +49,45 @@ class Truck:
         self._current_time = current_time
 
     @property
-    def packages(self):
-        return self._packages
+    def miles_traveled(self):
+        return self._miles_traveled
+
+    @miles_traveled.setter
+    def miles_traveled(self, miles: float):
+        if not isinstance(miles, (float, int)):
+            raise ValueError('Invalid "miles traveled" value.')
+        self._miles_traveled = miles
+
+    @property
+    def packages_queue(self):
+        return self._packages_queue
+
+    @property
+    def locations_to_packages_table(self):
+        return self._locations_to_packages_table
+
+    # def add_package_id(self, package_id: int):
+    #     if not isinstance(package_id, int):
+    #         raise ValueError('Invalid "package ID" value')
+    #     self.package_ids.add_node(package_id, False)
+    #     return
+    #
+    # def remove_package_id(self, package_id: int):
+    #     if not isinstance(package_id, int):
+    #         raise ValueError('Invalid "package ID" value')
+    #     if package_id in self._package_ids:
+    #         self._package_ids.remove(package_id)
+    #     return
+
+    @property
+    def cumulative_priority_value(self):
+        return self._cumulative_priority_value
+
+    @cumulative_priority_value.setter
+    def cumulative_priority_value(self, new_value):
+        if not isinstance(new_value, (float, int)):
+            raise ValueError('Invalid "cumulative priority value".')
+        self._cumulative_priority_value = new_value
 
     @property
     def delivered_packages(self):
@@ -89,8 +134,14 @@ class Truck:
         if not is_preassigned and self.current_capacity == 0:
             raise ValueError(f'Truck #{self.id} is full; cannot load Package #{package.id}')
         priority = package.priority
-        self.packages.insert(priority=priority, information=package)
+        self.packages_queue.insert(priority=priority, information=package)
+        package.status = Package.STATUSES[2]
+        if not self.locations_to_packages_table.get_node(package.destination):
+            self.locations_to_packages_table.add_node(unhashed_key=package.destination, value=[package])
+        else:
+            curr_loc_list = self.locations_to_packages_table.get_node(package.destination).value
+            curr_loc_list.append(package)
+        self.cumulative_priority_value += priority
         if not is_preassigned:
             self.current_capacity -= 1
-        # print(f'{package} ADDED TO TRUCK #{self.id} with CAPACITY #{self.current_capacity}')
         return
