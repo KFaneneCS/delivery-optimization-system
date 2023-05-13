@@ -4,7 +4,7 @@ from typing import List
 import datetime as dt
 
 # Weighting coefficient
-RELATIVE_WEIGHT = 0.25
+RELATIVE_WEIGHT = 0.75
 
 
 def get_package_weight(distance: float, deadline: dt.time, max_distance_value: float, opening: dt.time = dt.time(8, 0),

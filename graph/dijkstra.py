@@ -1,3 +1,5 @@
+import math
+
 from data_structures.hash import HashTable
 from data_structures.priority_queue import MinPriorityQueue
 from locations.location import Location
@@ -15,6 +17,7 @@ class Dijkstra:
         self.priority_queue = MinPriorityQueue()
         self.unvisited = set()
         self.visited = set()
+        self._closest_from_start = None
         self._initialize()
         self._execute()
         self._find_all_shortest_paths()
@@ -53,7 +56,7 @@ class Dijkstra:
                     # print(f'        From curr_node: {dist_neighbor_to_curr} | From start: {dist_start_to_curr}')
                     if min_dist_to_curr + dist_neighbor_to_curr < dist_start_to_curr:
                         # print(f'*****UPDATING***** distance to neighbor_node node')
-                        new_min_dist = round(min_dist_to_curr + dist_neighbor_to_curr, ndigits=1)
+                        new_min_dist = round(min_dist_to_curr + dist_neighbor_to_curr, ndigits=3)
                         self.distance_table.change_node(unhashed_key=neighbor_node, new_value=(new_min_dist, curr_node))
                         self.priority_queue.change_priority(priority=new_min_dist, information=neighbor_node)
 
@@ -94,6 +97,15 @@ class Dijkstra:
         weight = node.value[0]
         prev = node.value[1]
         return weight, prev
+
+    def get_closest_from_start(self, visited: set):
+        min_distance = math.inf
+        curr_closest = None
+        for target, (distance, _) in self.distance_table.items():
+            if target not in visited and distance < min_distance and distance != 0:
+                min_distance = distance
+                curr_closest = target
+        return curr_closest, min_distance
 
     def get_max_distance(self):
         max_distance = 0.0

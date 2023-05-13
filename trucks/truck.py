@@ -2,6 +2,7 @@ from datetime import datetime, date, time, timedelta
 from locations.location import Location
 from packages.package import Package
 from data_structures.priority_queue import MaxPriorityQueue
+from data_structures.linked_list import LinkedList
 from data_structures.hash import HashTable
 from .driver import Driver
 
@@ -13,22 +14,22 @@ class Truck:
         self._driver = driver
         self._current_time = current_time
         self._miles_traveled = 0
-        self._packages_queue = MaxPriorityQueue()
+        self._packages_list = LinkedList()
         self._locations_to_packages_table = HashTable()
-        self._cumulative_priority_value = 0
+        # self._cumulative_priority_value = 0
         self._delivered_packages = []
-        self._return_time = None
+        self._departure_time = current_time
         self._current_location = current_location
         self._MAX_CAPACITY = 16
         self._current_capacity = self.MAX_CAPACITY
 
-    def __str__(self):
-        return f'''Truck ID={self.id}
-        Driver={self.driver}
-        Current Location={self.current_location.address}
-        Next Stop={self.packages_queue.peek()}
-        Return Time={self.return_time}
-        Capacity={self.current_capacity}'''
+    # def __str__(self):
+    #     return f'''Truck ID={self.id}
+    #     Driver={self.driver}
+    #     Current Location={self.current_location.address}
+    #     Next Stop={self.packages_queue.peek()}
+    #     Return Time={self.departure_time}
+    #     Capacity={self.current_capacity}'''
 
     @property
     def id(self):
@@ -59,8 +60,8 @@ class Truck:
         self._miles_traveled = miles
 
     @property
-    def packages_queue(self):
-        return self._packages_queue
+    def packages_list(self):
+        return self._packages_list
 
     @property
     def locations_to_packages_table(self):
@@ -79,29 +80,29 @@ class Truck:
     #         self._package_ids.remove(package_id)
     #     return
 
-    @property
-    def cumulative_priority_value(self):
-        return self._cumulative_priority_value
-
-    @cumulative_priority_value.setter
-    def cumulative_priority_value(self, new_value):
-        if not isinstance(new_value, (float, int)):
-            raise ValueError('Invalid "cumulative priority value".')
-        self._cumulative_priority_value = new_value
+    # @property
+    # def cumulative_priority_value(self):
+    #     return self._cumulative_priority_value
+    #
+    # @cumulative_priority_value.setter
+    # def cumulative_priority_value(self, new_value):
+    #     if not isinstance(new_value, (float, int)):
+    #         raise ValueError('Invalid "cumulative priority value".')
+    #     self._cumulative_priority_value = new_value
 
     @property
     def delivered_packages(self):
         return self._delivered_packages
 
     @property
-    def return_time(self):
-        return self._return_time
+    def departure_time(self):
+        return self._departure_time
 
-    @return_time.setter
-    def return_time(self, return_time: datetime):
-        if not isinstance(return_time, datetime):
-            raise ValueError('Invalid "current time" value.')
-        self._return_time = return_time
+    @departure_time.setter
+    def departure_time(self, departure_time: timedelta):
+        if not isinstance(departure_time, timedelta):
+            raise ValueError('Invalid "departure time" value.')
+        self._departure_time = departure_time
 
     @property
     def current_location(self):
