@@ -1,5 +1,5 @@
 from data_structures.hash import HashTable
-import bisect
+from locations.location import Location
 
 
 class Graph:
@@ -22,7 +22,7 @@ class Graph:
         self.graph.add_node(vertex, [])
         self.size += 1
 
-    def add_weighted_edge(self, source, target, weight):
+    def add_weighted_edge(self, source: Location, target: Location, weight: float):
         # Graph node with address as key and (target location, weight) tuple as value
         source_node = self.graph.get_node(source)
         source_tuple = (target, weight)

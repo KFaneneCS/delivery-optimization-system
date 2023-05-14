@@ -27,7 +27,7 @@ class LinkedList:
             yield current
             current = current.prev
 
-    def append(self, value, **kwargs):
+    def add_link(self, value, **kwargs):
         new_node = Node(value, **kwargs)
         if self._head is None:
             self._head = self._tail = new_node
@@ -38,25 +38,25 @@ class LinkedList:
         self._tail = new_node
         self._size += 1
 
-    def prepend(self, value):
+    def prepend_link(self, value):
         new_node = Node(value)
         self._head.prev = new_node
         new_node.next = self._head
         self._head = new_node
         self._size += 1
 
-    def insert(self, index, value):
+    def insert_link(self, index, value):
         if index < 0:
             raise IndexError("Index out of bounds")
         if index == 0:
-            self.prepend(value)
+            self.prepend_link(value)
             return
         if index >= self._size:
-            self.append(value)
+            self.add_link(value)
             return
 
         new_node = Node(value)
-        prev_node = self.node_at(index-1)
+        prev_node = self.link_at(index - 1)
         following_node = prev_node.next
         new_node.prev = prev_node
         new_node.next = following_node
@@ -64,14 +64,14 @@ class LinkedList:
         following_node.prev = new_node
         self._size += 1
 
-    def remove(self, index):
+    def remove_link(self, index):
         if (index > self._size - 1) or (index < 0):
             raise IndexError("Index out of bounds")
         if index == 0:
             self._head = self._head.next
             self._head.prev = None
             return
-        node = self.node_at(index)
+        node = self.link_at(index)
         node.prev.next, node.next.prev = node.next, node.prev
         self._size -= 1
 
@@ -83,7 +83,11 @@ class LinkedList:
     def tail(self):
         return self._tail
 
-    def node_at(self, index):
+    @property
+    def size(self):
+        return self._size
+
+    def link_at(self, index):
         if (index > self._size - 1) or (index < 0):
             raise IndexError("Index out of bounds")
         if index < self._size // 2:

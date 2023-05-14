@@ -11,14 +11,15 @@ class Package:
         self._deadline = deadline
         self._kilos = kilos
         self._notes = notes
+        self._space_already_allocated = False
         self._truck_id = None
         self._wrong_address = False
         self._priority = None
         self._status = Package.STATUSES[0]
 
-    def __str__(self):
-        return f'Package(ID={self._id} | destination={self.destination} | deadline={self._deadline} |\n ' \
-               f'        priority={self._priority} | status={self._status} | truck={self._truck_id})'
+    def __repr__(self):
+        return f'Package(ID={self._id} | destination={self.destination} | deadline={self._deadline} | ' \
+               f'priority={self._priority} | status={self._status} | truck={self._truck_id})'
 
     # TODO:  Cite:  https://stackoverflow.com/questions/2627002/whats-the-pythonic-way-to-use-getters-and-setters
     @property
@@ -36,6 +37,14 @@ class Package:
     @property
     def special_notes(self):
         return self._notes
+
+    @property
+    def space_already_allocated(self):
+        return self._space_already_allocated
+
+    @space_already_allocated.setter
+    def space_already_allocated(self, space_allocated: bool):
+        self._space_already_allocated = space_allocated
 
     @property
     def priority(self):

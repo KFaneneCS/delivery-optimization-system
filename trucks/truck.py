@@ -14,22 +14,22 @@ class Truck:
         self._driver = driver
         self._current_time = current_time
         self._miles_traveled = 0
+        # Linked List chosen instead of priority queue due to potential for multiple insertions
         self._packages_list = LinkedList()
         self._locations_to_packages_table = HashTable()
-        # self._cumulative_priority_value = 0
         self._delivered_packages = []
         self._departure_time = current_time
         self._current_location = current_location
         self._MAX_CAPACITY = 16
         self._current_capacity = self.MAX_CAPACITY
 
-    # def __str__(self):
-    #     return f'''Truck ID={self.id}
-    #     Driver={self.driver}
-    #     Current Location={self.current_location.address}
-    #     Next Stop={self.packages_queue.peek()}
-    #     Return Time={self.departure_time}
-    #     Capacity={self.current_capacity}'''
+    def __str__(self):
+        return f'''Truck ID={self.id}
+        Driver={self.driver}
+        Current Location={self.current_location.address}
+        Departure Time={self.departure_time}
+        Packages Loaded={self.packages_list.size}
+        Capacity={self.current_capacity}'''
 
     @property
     def id(self):
@@ -130,19 +130,3 @@ class Truck:
             raise ValueError('Cannot exceed maximum capacity.')
 
         self._current_capacity = new_curr_capacity
-
-    def load_package(self, package: Package, is_preassigned: bool = False):
-        if not is_preassigned and self.current_capacity == 0:
-            raise ValueError(f'Truck #{self.id} is full; cannot load Package #{package.id}')
-        priority = package.priority
-        self.packages_queue.insert(priority=priority, information=package)
-        package.status = Package.STATUSES[2]
-        if not self.locations_to_packages_table.get_node(package.destination):
-            self.locations_to_packages_table.add_node(unhashed_key=package.destination, value=[package])
-        else:
-            curr_loc_list = self.locations_to_packages_table.get_node(package.destination).value
-            curr_loc_list.append(package)
-        self.cumulative_priority_value += priority
-        if not is_preassigned:
-            self.current_capacity -= 1
-        return

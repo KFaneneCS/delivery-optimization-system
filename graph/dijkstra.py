@@ -92,6 +92,9 @@ class Dijkstra:
         self.all_paths.add_node(target_location, path)
         return path
 
+    def get_shortest_path_distance(self, target_location) -> float:
+        return self.all_paths.get_node(target_location).value[-1][1]
+
     def get_dist_and_prev(self, target):
         node = self.distance_table.get_node(target)
         weight = node.value[0]
