@@ -1,7 +1,7 @@
 from datetime import datetime, date, time, timedelta
 from locations.location import Location
 from packages.package import Package
-from data_structures.priority_queue import MaxPriorityQueue
+from data_structures.priority_queue import MinPriorityQueue
 from data_structures.linked_list import LinkedList
 from data_structures.hash import HashTable
 from .driver import Driver
@@ -14,22 +14,24 @@ class Truck:
         self._driver = driver
         self._current_time = current_time
         self._miles_traveled = 0
-        # Linked List chosen instead of priority queue due to potential for multiple insertions
-        self._packages_list = LinkedList()
+        self._packages_queue = MinPriorityQueue()
         self._locations_to_packages_table = HashTable()
+        self._seen_packages = HashTable()
         self._delivered_packages = []
-        self._departure_time = current_time
+        self._departure_time = self._current_time
         self._current_location = current_location
         self._MAX_CAPACITY = 16
         self._current_capacity = self.MAX_CAPACITY
 
     def __str__(self):
-        return f'''Truck ID={self.id}
-        Driver={self.driver}
-        Current Location={self.current_location.address}
-        Departure Time={self.departure_time}
-        Packages Loaded={self.packages_list.size}
-        Capacity={self.current_capacity}'''
+        return f'''Truck ID={self._id}
+        Driver={self._driver}
+        Current Location={self._current_location.address}
+        Departure Time={self._departure_time}
+        Current Time={self._current_time}
+        Next Up={self._packages_queue.peek()}
+        Miles Traveled={self._miles_traveled}
+        Capacity={self._current_capacity}'''
 
     @property
     def id(self):
@@ -44,8 +46,8 @@ class Truck:
         return self._current_time
 
     @current_time.setter
-    def current_time(self, current_time: datetime):
-        if not isinstance(current_time, datetime):
+    def current_time(self, current_time: timedelta):
+        if not isinstance(current_time, timedelta):
             raise ValueError('Invalid "current time" value.')
         self._current_time = current_time
 
@@ -55,17 +57,21 @@ class Truck:
 
     @miles_traveled.setter
     def miles_traveled(self, miles: float):
-        if not isinstance(miles, (float, int)):
+        if not isinstance(miles, (float, int)) or miles < 0:
             raise ValueError('Invalid "miles traveled" value.')
         self._miles_traveled = miles
 
     @property
-    def packages_list(self):
-        return self._packages_list
+    def packages_queue(self):
+        return self._packages_queue
 
     @property
     def locations_to_packages_table(self):
         return self._locations_to_packages_table
+
+    @property
+    def seen_packages(self):
+        return self._seen_packages
 
     # def add_package_id(self, package_id: int):
     #     if not isinstance(package_id, int):
@@ -124,9 +130,9 @@ class Truck:
 
     @current_capacity.setter
     def current_capacity(self, new_curr_capacity: int):
-        if not isinstance(new_curr_capacity, int) or new_curr_capacity < 0:
+        if not isinstance(new_curr_capacity, int):
             raise ValueError('Invalid "new current capacity value".')
-        if new_curr_capacity > self.MAX_CAPACITY:
+        if new_curr_capacity < 0:
             raise ValueError('Cannot exceed maximum capacity.')
 
         self._current_capacity = new_curr_capacity

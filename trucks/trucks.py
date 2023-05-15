@@ -8,10 +8,11 @@ from locations.location import Location
 
 class Trucks:
     def __init__(self, num_trucks: int, num_drivers: int, start_location: Location = None,
-                 curr_time: timedelta = None):
+                 start_time: timedelta = None, curr_time: timedelta = None):
         self._num_trucks = num_trucks
         self._num_drivers = num_drivers
         self._starting_location = start_location
+        self._start_time = start_time
         self._curr_time = curr_time
         self._trucks = []
         self._delayed_packages = []
@@ -40,11 +41,15 @@ class Trucks:
     def add_delayed_package(self, package: Package):
         self._delayed_packages.append(package)
 
-    def find_available_truck(self, num_packages: int, current_time: timedelta):
-        for truck in self.trucks:
-            if truck.current_capacity - num_packages > 0 and truck.departure_time <= current_time:
-                return truck
-        return None
+    def find_available_truck(self, assoc_packages: List[Package], current_time: timedelta):
+        for package in assoc_packages:
+            if package.truck_id:
+                return self.get_truck_by_id(package.truck_id)
+
+        num_packages = len(assoc_packages)
+        available_trucks = [truck for truck in self._trucks if (
+                truck.departure_time <= current_time or not truck.driver) and truck.current_capacity >= num_packages]
+        return available_trucks[0] if available_trucks else None
 
     def get_truck_by_id(self, truck_id):
         for truck in self.trucks:
@@ -52,16 +57,20 @@ class Trucks:
                 return truck
         return None
 
-    def load_packages(self, truck: Truck, packages: List[Package], travel_time: timedelta):
-        if truck.current_capacity < 1:
-            raise ValueError(f'Truck #{truck.id} is full; cannot load Packages {[p.id for p in packages]}')
+    def load_packages(self, packages: List[Package], travel_time: timedelta, current_time: timedelta):
+        # if truck.current_capacity < 0:
+        #     raise ValueError(f'Truck #{truck.id} is full; cannot load Packages {[p.id for p in packages]}')
         # TODO:  Likely need add'l logic that inserts if priority value < tail value
         for package in packages:
-            if not package.truck_id:
-                package.truck_id = truck.id
-                if not package.space_already_allocated:
-                    truck.current_capacity -= 1
-            truck.packages_list.add_link(value=package.priority, package=package, travel_time=travel_time)
+            truck_id = package.truck_id
+            truck = self.get_truck_by_id(truck_id)
+            if not truck:
+                raise ValueError(f'Package #{package.id} missing Truck assignment.')
+            if not package.space_already_allocated:
+                truck.current_capacity -= 1
+            truck.packages_queue.insert(priority=package.priority, information=package)
+            if truck.driver and truck.departure_time <= self._start_time:
+                package.status = Package.STATUSES[2]
 
         # priority = package.priority
         # self.packages_queue.insert(priority=priority, information=package)
