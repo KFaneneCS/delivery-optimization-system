@@ -9,9 +9,6 @@ class MinPriorityQueue:
         self.queue = []
 
     def insert(self, priority, information=None):
-        if not isinstance(priority, (int, float)):
-            raise ValueError('Invalid "priority" value.')
-
         new_node = QueueNode(priority, information)
 
         self.queue.append(new_node)
@@ -72,6 +69,9 @@ class MinPriorityQueue:
 
     def is_empty(self):
         return len(self.queue) == 0
+
+    def get_size(self):
+        return len(self.queue)
 
 
 class MaxPriorityQueue:
@@ -135,3 +135,6 @@ class MaxPriorityQueue:
 
     def is_empty(self):
         return len(self.queue) == 0
+
+    def get_size(self):
+        return len(self.queue)

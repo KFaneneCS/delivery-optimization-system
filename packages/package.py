@@ -1,11 +1,11 @@
-import datetime
+from datetime import timedelta
 from locations.location import Location
 
 
 class Package:
-    STATUSES = ['At Hub', 'Delayed', 'In Transit', 'Delivered']
+    STATUSES = ['At Hub', 'Delayed', 'En Route', 'Delivered']
 
-    def __init__(self, id_: int, destination: Location, deadline: datetime, kilos: int, notes: str):
+    def __init__(self, id_: int, destination: Location, deadline: timedelta, kilos: int, notes: str):
         self._id = id_
         self._destination = destination
         self._deadline = deadline
@@ -15,7 +15,9 @@ class Package:
         self._truck_id = None
         self._wrong_address = False
         self._priority = None
-        self._status = Package.STATUSES[0]
+        self._status = None
+        self._ready_time = timedelta(hours=0, minutes=0)
+        self._status_at_times = []
 
     def __repr__(self):
         return f'Package(ID={self._id} | destination={self.destination} | deadline={self._deadline} | ' \
@@ -29,6 +31,12 @@ class Package:
     @property
     def destination(self):
         return self._destination
+
+    @destination.setter
+    def destination(self, new_destination: Location):
+        if not isinstance(new_destination, Location):
+            raise ValueError('Invalid "destination" value.')
+        self._destination = new_destination
 
     @property
     def deadline(self):
@@ -80,8 +88,22 @@ class Package:
     def status(self):
         return self._status
 
-    @status.setter
-    def status(self, new_status):
+    @property
+    def ready_time(self):
+        return self._ready_time
+
+    @ready_time.setter
+    def ready_time(self, ready_time: timedelta):
+        if not isinstance(ready_time, timedelta):
+            raise ValueError('Invalid "ready time" value.')
+        self._ready_time = ready_time
+
+    @property
+    def status_at_times(self):
+        return self._status_at_times
+
+    def set_status(self, new_status: STATUSES, curr_time: timedelta):
         if new_status not in self.STATUSES:
             raise ValueError(f'Invalid status: {new_status}.')
         self._status = new_status
+        self._status_at_times.append((curr_time, new_status))

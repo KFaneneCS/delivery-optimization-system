@@ -72,3 +72,7 @@ class Packages:
             if package.id == package_id:
                 return package
         return None
+
+    def get_all_statuses_by_time(self):
+        for package in self._packages:
+            yield package, package.status_at_times

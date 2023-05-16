@@ -18,6 +18,7 @@ class Truck:
         self._locations_to_packages_table = HashTable()
         self._seen_packages = HashTable()
         self._delivered_packages = []
+        self._location_by_time_list = []
         self._departure_time = self._current_time
         self._current_location = current_location
         self._MAX_CAPACITY = 16
@@ -40,6 +41,10 @@ class Truck:
     @property
     def driver(self):
         return self._driver
+
+    @driver.setter
+    def driver(self, new_driver: Driver):
+        self._driver = new_driver
 
     @property
     def current_time(self):
@@ -99,6 +104,10 @@ class Truck:
     @property
     def delivered_packages(self):
         return self._delivered_packages
+
+    @property
+    def location_by_time_list(self):
+        return self._location_by_time_list
 
     @property
     def departure_time(self):
