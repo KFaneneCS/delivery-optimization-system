@@ -1,10 +1,9 @@
-import datetime
+from datetime import datetime, timedelta
 from .package import Package
 from locations.locations import Locations
 from data_structures.hash import HashTable
 from data.packages_loader import PackagesLoader
 from graph.dijkstra import Dijkstra
-from priority_logic import priority_logic
 
 
 class Packages:
@@ -17,7 +16,6 @@ class Packages:
         self._location_to_packages_table = HashTable()
         self._add_all_packages()
         self._associate_packages_to_locations()
-        self._assign_priority_values()
 
     def _add_all_packages(self):
         for dataset in self._loader.get_data():
@@ -25,7 +23,8 @@ class Packages:
                 package_id = int(dataset[0])
                 destination = self._locations.get_location(dataset[1].strip())
                 if dataset[5] != 'EOD':
-                    deadline = datetime.datetime.strptime(dataset[5], '%I:%M %p').time()
+                    deadline_dt = datetime.strptime(dataset[5], '%I:%M %p').time()
+                    deadline = timedelta(hours=deadline_dt.hour, minutes=deadline_dt.minute)
                 else:
                     deadline = None
                 kilos = int(dataset[6])
@@ -41,19 +40,6 @@ class Packages:
                 self._location_to_packages_table.add_node(destination, [package])
             else:
                 self._location_to_packages_table.get_node(destination).value.append(package)
-
-    # FIXME:  Will likely be removing altogether since we are overhauling the priority logic
-    def _assign_priority_values(self):
-        max_distance = self._shortest_paths.get_max_distance()
-
-        for package in self.packages:
-            destination = package.destination
-            distance = self._shortest_paths.distance_table.get_node(destination).value[0]
-            deadline = package.deadline
-            priority_value = priority_logic.get_package_weight(distance, deadline, max_distance)
-            package.priority = priority_value
-
-        return self
 
     @property
     def packages(self):

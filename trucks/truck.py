@@ -14,7 +14,9 @@ class Truck:
         self._driver = driver
         self._current_time = current_time
         self._miles_traveled = 0
-        self._packages_queue = MinPriorityQueue()
+        self._packages_without_deadline_queue = MinPriorityQueue()
+        self._packages_with_deadlines_queue = MinPriorityQueue()
+        self._test_queue = MinPriorityQueue()
         self._locations_to_packages_table = HashTable()
         self._seen_packages = HashTable()
         self._delivered_packages = []
@@ -30,9 +32,14 @@ class Truck:
         Current Location={self._current_location.address}
         Departure Time={self._departure_time}
         Current Time={self._current_time}
-        Next Up={self._packages_queue.peek()}
+        Next Up={self._packages_without_deadline_queue.peek()}
         Miles Traveled={self._miles_traveled}
         Capacity={self._current_capacity}'''
+
+    # FIXME: Test
+    @property
+    def test_queue(self):
+        return self._test_queue
 
     @property
     def id(self):
@@ -67,8 +74,12 @@ class Truck:
         self._miles_traveled = miles
 
     @property
-    def packages_queue(self):
-        return self._packages_queue
+    def packages_without_deadlines_queue(self):
+        return self._packages_without_deadline_queue
+
+    @property
+    def packages_with_deadlines_queue(self):
+        return self._packages_with_deadlines_queue
 
     @property
     def locations_to_packages_table(self):
@@ -77,29 +88,6 @@ class Truck:
     @property
     def seen_packages(self):
         return self._seen_packages
-
-    # def add_package_id(self, package_id: int):
-    #     if not isinstance(package_id, int):
-    #         raise ValueError('Invalid "package ID" value')
-    #     self.package_ids.add_node(package_id, False)
-    #     return
-    #
-    # def remove_package_id(self, package_id: int):
-    #     if not isinstance(package_id, int):
-    #         raise ValueError('Invalid "package ID" value')
-    #     if package_id in self._package_ids:
-    #         self._package_ids.remove(package_id)
-    #     return
-
-    # @property
-    # def cumulative_priority_value(self):
-    #     return self._cumulative_priority_value
-    #
-    # @cumulative_priority_value.setter
-    # def cumulative_priority_value(self, new_value):
-    #     if not isinstance(new_value, (float, int)):
-    #         raise ValueError('Invalid "cumulative priority value".')
-    #     self._cumulative_priority_value = new_value
 
     @property
     def delivered_packages(self):

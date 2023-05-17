@@ -1,5 +1,6 @@
 from typing import List
 from datetime import timedelta
+from data_structures.linked_list import LinkedList
 from .truck import Truck
 from packages.package import Package
 from .driver import Driver
@@ -65,7 +66,14 @@ class Trucks:
                 raise ValueError(f'Package #{package.id} missing Truck assignment.')
             if not package.space_already_allocated:
                 truck.current_capacity -= 1
-            truck.packages_queue.insert(priority=package.priority, information=package)
+            if package.deadline is None:
+                # print(f'Package #{package.id} with NO deadline ---> {truck.id}')
+                truck.packages_without_deadlines_queue.insert(priority=package.priority, information=package)
+            else:
+                # print(f'Package #{package.id} WITH deadline ---> {truck.id}')
+                truck.packages_with_deadlines_queue.insert(priority=package.priority, information=package)
+            # truck.test_queue.insert(priority=package.priority, information=package)
+
             if truck.driver and truck.departure_time <= self._start_time:
                 package.set_status(Package.STATUSES[2], current_time)
         return
