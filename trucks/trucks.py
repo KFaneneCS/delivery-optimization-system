@@ -48,8 +48,7 @@ class Trucks:
                 return self.get_truck_by_id(package.truck_id)
 
         num_packages = len(assoc_packages)
-        available_trucks = [truck for truck in self._trucks if (
-                truck.departure_time <= current_time or not truck.driver) and truck.current_capacity >= num_packages]
+        available_trucks = [truck for truck in self._trucks if (truck.departure_time <= current_time or not truck.driver) and truck.current_capacity >= num_packages]
         return available_trucks[0] if available_trucks else None
 
     def get_truck_by_id(self, truck_id):

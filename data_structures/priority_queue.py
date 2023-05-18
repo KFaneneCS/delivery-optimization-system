@@ -66,6 +66,13 @@ class MinPriorityQueue:
                 return node.information
         return None
 
+    def remove_last(self):
+        if self._queue:
+            removed_node = self._queue.pop()
+            self.heapify(0, len(self._queue))
+            return removed_node
+        return None
+
     def peek(self):
         try:
             return self._queue[0].information
@@ -143,6 +150,13 @@ class MaxPriorityQueue:
             if node.information == info:
                 node = self._queue.pop(i)
                 return node.information
+        return None
+
+    def remove_last(self):
+        if self._queue:
+            removed_node = self._queue.pop()
+            self.heapify(0, len(self._queue))
+            return removed_node
         return None
 
     def peek(self):

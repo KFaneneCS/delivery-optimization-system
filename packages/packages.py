@@ -7,10 +7,9 @@ from graph.dijkstra import Dijkstra
 
 
 class Packages:
-    def __init__(self, package_csv: str, shortest_paths: Dijkstra, locations: Locations):
+    def __init__(self, package_csv: str, locations: Locations):
         self._packages = []
         self._loader = PackagesLoader(package_csv)
-        self._shortest_paths = shortest_paths
         self._locations = locations
         self._priority_queue = None
         self._location_to_packages_table = HashTable()
@@ -52,6 +51,9 @@ class Packages:
     @property
     def locations_to_packages_table(self):
         return self._location_to_packages_table
+
+    def get_num_packages(self):
+        return len(self._packages)
 
     def get_package_by_id(self, package_id):
         for package in self.packages:

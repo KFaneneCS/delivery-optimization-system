@@ -1,3 +1,4 @@
+import math
 from graph.dijkstra import Dijkstra
 from data.locations_loader import LocationsLoader
 from .location import Location

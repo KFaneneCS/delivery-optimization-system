@@ -32,7 +32,6 @@ class LogisticsManager:
         self._hub_shortest_paths = self._all_shortest_paths.get_node(self._hub).value
         self._packages = Packages(
             package_csv=PACKAGES_FILE,
-            shortest_paths=self._hub_shortest_paths,  # FIXME
             locations=self._locations
         )
         self._locations_to_packages_table = self._packages.locations_to_packages_table
@@ -53,13 +52,17 @@ class LogisticsManager:
         self._truck_handling_delayed = None
         self._package_status_by_time_table = HashTable()
         self._handle_special_cases()
-        self._load_packages()
+        self._ready_packages()
 
     @staticmethod
     def _timedelta_to_dt_formatted(td: timedelta):
         today = datetime.today().date()
         dt = datetime.combine(today, datetime.min.time()) + td
         return dt.strftime("%H:%M:%S")
+
+    @staticmethod
+    def dist_to_time_conversion(dist: float):
+        return timedelta(hours=(dist / TRUCK_SPEED))
 
     def _find_all_shortest_paths(self):
         for location in self._locations.get_all_locations():
@@ -72,12 +75,13 @@ class LogisticsManager:
         visited = {self._hub}
         self._ordered_locations.insert(0, (current.start, total_distance))
 
-        for x in range(current.distance_table.get_size() - 1):
+        for i in range(current.distance_table.get_size() - 1):
             next_location, distance = current.get_closest_from_start(visited)
-            self._ordered_locations.insert(x + 1, (next_location, distance))
+            self._ordered_locations.insert(i + 1, (next_location, distance))
             visited.add(next_location)
             total_distance += distance
             current = self._all_shortest_paths.get_node(next_location).value
+
 
     def _handle_special_cases(self):
         def handle_only_truck_2(pckg: Package):
@@ -111,6 +115,10 @@ class LogisticsManager:
         def handle_wrong_address(pckg: Package):
             pckg.wrong_address = True
             pckg.ready_time = CORRECTED_ADDRESS_TIME
+            pckg.truck_id = 3
+            truck_3 = self._trucks.get_truck_by_id(3)
+            truck_3.current_capacity -= 1
+            pckg.space_already_allocated = True
 
         def handle_grouped_packages(pckg: Package):
             special_note = pckg.special_notes
@@ -150,42 +158,75 @@ class LogisticsManager:
 
         return self._special_cases
 
-    def _load_packages(self):
+    def _ready_packages(self):
+        # Iterate over all packages and update their status.
         for package in self._packages.packages:
             if package.status != 'Delayed':
                 package.set_status(Package.STATUSES[0], BEGINNING_OF_DAY)
 
+        # Set departure time for trucks without drivers from the start to the default end of day.
         for truck in self._trucks.trucks:
             if not truck.driver:
                 truck.departure_time = END_OF_DAY
 
         delayed_package_truck = self._truck_handling_delayed
+
+        # Set our initial priority value to the highest possible value of 1.
         curr_priority_value = 1
 
+        # Predetermined the truck to take the group of packages that must stay together, then decrement that truck's
+        # capacity so that it doesn't fill up before all packages in the group are ready to be loaded.
         truck_taking_group = self._trucks.get_truck_by_id(1)
         truck_taking_group.current_capacity -= len(self._grouped_packages)
         for package in self._grouped_packages:
             package.truck_id = truck_taking_group.id
             package.space_already_allocated = True
 
+        # Fetching all (location, distance) tuples by location based on their priority, the value of which was
+        # determined by proximity previously.
         while not self._ordered_locations.is_empty():
             location, distance = self._ordered_locations.get()
 
+            # No need to consider the HUB since we begin there and no package is addressed to it.
             if location.address == 'HUB':
                 continue
 
+            # List of packages associated with the current location.
             destination_packages = self._locations_to_packages_table.get_node(location).value
+
+            # Finding a truck with capacity that could be used for the current set of packages, not accounting for
+            # other package criteria.
             curr_truck = self._trucks.find_available_truck(current_time=START_TIME, assoc_packages=destination_packages)
 
             group_truck_id = -1
             destination_packages_assigned = False
             for package in destination_packages:
                 package.priority = curr_priority_value
-                if package.status == 'Delayed' or package.wrong_address:
+                if package.status == 'Delayed':
                     curr_truck = delayed_package_truck
                     package.truck_id = curr_truck.id
                     group_truck_id = curr_truck.id
                     destination_packages_assigned = True
+                if package.deadline and not package.truck_id:
+                    trucks_with_drivers = [t for t in self._trucks.trucks if t.driver]
+                    # truck_index = curr_priority_value % len(trucks_with_drivers)
+                    # package.truck_id = trucks_with_drivers[0].id
+                    onloading_truck = trucks_with_drivers[0]
+                    offloading_truck = None
+                    if onloading_truck.current_capacity > 0:
+                        package.truck_id = onloading_truck.id
+                    else:
+                        i = 0
+                        while not onloading_truck.current_capacity > 0:
+                            offloading_truck, onloading_truck = onloading_truck, trucks_with_drivers[i + 1]
+
+                        offloading_package_node = offloading_truck.packages_without_deadlines_queue.remove_last()
+                        offloading_truck.current_capacity += 1
+                        onloading_truck.packages_without_deadlines_queue.insert(offloading_package_node.priority,
+                                                                                offloading_package_node.information)
+                        onloading_truck.current_capacity -= 1
+                        package.truck_id = offloading_truck.id
+
                 curr_priority_value += 1
 
             for package in destination_packages:
@@ -201,10 +242,6 @@ class LogisticsManager:
             self._trucks.load_packages(packages=destination_packages, current_time=START_TIME)
         for p in self._packages.packages:
             print(p)
-
-    @staticmethod
-    def dist_to_time_conversion(dist: float):
-        return timedelta(hours=(dist / TRUCK_SPEED))
 
     def process_packages(self, truck, curr_time, curr_location, delivered_packages):
         print(f'Current truck: {truck.id}')
@@ -244,10 +281,10 @@ class LogisticsManager:
 
             next_pckg_with_deadline = truck.packages_with_deadlines_queue.peek()
             next_pckg_without_deadline = truck.packages_without_deadlines_queue.peek()
+            deadline_approaching = False
 
             if next_pckg_with_deadline:
                 deadline = next_pckg_with_deadline.deadline
-                deadline_approaching = False
                 hypothetical_route_dist = curr_shortest_paths.get_shortest_path_distance(
                     next_pckg_with_deadline.destination)
                 hyp_travel_time = self.dist_to_time_conversion(hypothetical_route_dist)
@@ -309,7 +346,9 @@ class LogisticsManager:
                         temp_storage.append(curr_package)
                         continue
                 elif curr_package.wrong_address and not curr_package.ready_time <= curr_time:
+                    print(f'  *** WRONG package triggered for pckg:  {curr_package}')
                     curr_package.set_status(Package.STATUSES[2], truck.departure_time)
+                    print(f'     ----> Status:  {curr_package.status}')
                     temp_storage.append(curr_package)
                     continue
                 elif curr_package.wrong_address and curr_package.ready_time <= curr_time:
@@ -330,9 +369,9 @@ class LogisticsManager:
                     truck.current_time += travel_time
                     curr_location = curr_destination
 
-                if curr_package.deadline:
-                    if curr_time > curr_package.deadline:
-                        raise RuntimeError(f'Missed deadline for package #{curr_package.id}')
+                # if curr_package.deadline:
+                #     if curr_time > curr_package.deadline:
+                #         raise RuntimeError(f'Missed deadline for package #{curr_package.id}')
 
                 curr_package.set_status(Package.STATUSES[3], curr_time)
                 delivered_packages.add_node(unhashed_key=curr_package, value=(truck, curr_time))

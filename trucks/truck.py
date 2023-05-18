@@ -14,7 +14,7 @@ class Truck:
         self._driver = driver
         self._current_time = current_time
         self._miles_traveled = 0
-        self._packages_without_deadline_queue = MinPriorityQueue()
+        self._packages_without_deadlines_queue = MinPriorityQueue()
         self._packages_with_deadlines_queue = MinPriorityQueue()
         self._test_queue = MinPriorityQueue()
         self._locations_to_packages_table = HashTable()
@@ -25,6 +25,7 @@ class Truck:
         self._current_location = current_location
         self._MAX_CAPACITY = 16
         self._current_capacity = self.MAX_CAPACITY
+        self._only_accepting_deadline_packages = False
 
     def __str__(self):
         return f'''Truck ID={self._id}
@@ -32,7 +33,7 @@ class Truck:
         Current Location={self._current_location.address}
         Departure Time={self._departure_time}
         Current Time={self._current_time}
-        Next Up={self._packages_without_deadline_queue.peek()}
+        Next Up={self._packages_without_deadlines_queue.peek()}
         Miles Traveled={self._miles_traveled}
         Capacity={self._current_capacity}'''
 
@@ -75,7 +76,7 @@ class Truck:
 
     @property
     def packages_without_deadlines_queue(self):
-        return self._packages_without_deadline_queue
+        return self._packages_without_deadlines_queue
 
     @property
     def packages_with_deadlines_queue(self):
@@ -133,3 +134,11 @@ class Truck:
             raise ValueError('Cannot exceed maximum capacity.')
 
         self._current_capacity = new_curr_capacity
+
+    @property
+    def only_allowing_deadline_packages(self):
+        return self._only_accepting_deadline_packages
+
+    @only_allowing_deadline_packages.setter
+    def only_allowing_deadline_packages(self, allowing_deadlines_only: bool):
+        self._only_accepting_deadline_packages = allowing_deadlines_only
