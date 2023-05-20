@@ -1,7 +1,7 @@
 from datetime import datetime, date, time, timedelta
 from locations.location import Location
 from packages.package import Package
-from data_structures.priority_queue import MinPriorityQueue
+from data_structures.priority_queue import PriorityQueue
 from data_structures.linked_list import LinkedList
 from data_structures.hash import HashTable
 from .driver import Driver
@@ -13,19 +13,17 @@ class Truck:
         self._id = id_
         self._driver = driver
         self._current_time = current_time
+        self._current_location = current_location
+        self._assigned_packages = []
         self._miles_traveled = 0
-        self._packages_without_deadlines_queue = MinPriorityQueue()
-        self._packages_with_deadlines_queue = MinPriorityQueue()
-        self._test_queue = MinPriorityQueue()
+        self._test_queue = PriorityQueue(is_max=False)
         self._locations_to_packages_table = HashTable()
         self._seen_packages = HashTable()
         self._delivered_packages = []
         self._location_by_time_list = []
         self._departure_time = self._current_time
-        self._current_location = current_location
         self._MAX_CAPACITY = 16
         self._current_capacity = self.MAX_CAPACITY
-        self._only_accepting_deadline_packages = False
 
     def __str__(self):
         return f'''Truck ID={self._id}
@@ -33,7 +31,6 @@ class Truck:
         Current Location={self._current_location.address}
         Departure Time={self._departure_time}
         Current Time={self._current_time}
-        Next Up={self._packages_without_deadlines_queue.peek()}
         Miles Traveled={self._miles_traveled}
         Capacity={self._current_capacity}'''
 
@@ -65,6 +62,20 @@ class Truck:
         self._current_time = current_time
 
     @property
+    def assigned_packages(self):
+        return self._assigned_packages
+
+    @property
+    def current_location(self):
+        return self._current_location
+
+    @current_location.setter
+    def current_location(self, current_location: Location):
+        if not isinstance(current_location, Location):
+            raise ValueError('Invalid "current location" value.')
+        self._current_location = current_location
+
+    @property
     def miles_traveled(self):
         return self._miles_traveled
 
@@ -73,14 +84,6 @@ class Truck:
         if not isinstance(miles, (float, int)) or miles < 0:
             raise ValueError('Invalid "miles traveled" value.')
         self._miles_traveled = miles
-
-    @property
-    def packages_without_deadlines_queue(self):
-        return self._packages_without_deadlines_queue
-
-    @property
-    def packages_with_deadlines_queue(self):
-        return self._packages_with_deadlines_queue
 
     @property
     def locations_to_packages_table(self):
@@ -109,16 +112,6 @@ class Truck:
         self._departure_time = departure_time
 
     @property
-    def current_location(self):
-        return self._current_location
-
-    @current_location.setter
-    def current_location(self, current_location: Location):
-        if not isinstance(current_location, Location):
-            raise ValueError('Invalid "current location" value.')
-        self._current_location = current_location
-
-    @property
     def MAX_CAPACITY(self):
         return self._MAX_CAPACITY
 
@@ -135,10 +128,13 @@ class Truck:
 
         self._current_capacity = new_curr_capacity
 
-    @property
-    def only_allowing_deadline_packages(self):
-        return self._only_accepting_deadline_packages
+    def add_assigned_package(self, package: Package):
+        if self.current_capacity - len(self.assigned_packages) == 0:
+            raise RuntimeError(f'Not enough capacity in truck #{self.id} to assign package #{package.id}')
+        if package.assigned:
+            raise RuntimeError(f'Package #{package.id} was already assigned!')
+        self.assigned_packages.append(package)
+        package.assigned = True
 
-    @only_allowing_deadline_packages.setter
-    def only_allowing_deadline_packages(self, allowing_deadlines_only: bool):
-        self._only_accepting_deadline_packages = allowing_deadlines_only
+    def load_package(self, package: Package):
+        print(f'Need to load Package #{package.id} to Truck {self.id}')

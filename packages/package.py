@@ -10,8 +10,8 @@ class Package:
         self._destination = destination
         self._deadline = deadline
         self._kilos = kilos
-        self._notes = notes
-        self._space_already_allocated = False
+        self._special_notes = notes
+        self._assigned = False
         self._truck_id = None
         self._wrong_address = False
         self._priority = None
@@ -20,8 +20,10 @@ class Package:
         self._status_at_times = []
 
     def __repr__(self):
-        return f'Package(ID={self._id} | destination={self.destination} | deadline={self._deadline} | ' \
-               f'priority={self._priority} | status={self._status} | truck={self._truck_id})'
+        return f'Package(ID={self._id} | destination={self.destination} | ' \
+               f'deadline={self._deadline} | assigned={self._assigned} | ' \
+               f'priority={self._priority} | status={self._status} | ' \
+               f'truck={self._truck_id}) '
 
     # TODO:  Cite:  https://stackoverflow.com/questions/2627002/whats-the-pythonic-way-to-use-getters-and-setters
     @property
@@ -44,15 +46,15 @@ class Package:
 
     @property
     def special_notes(self):
-        return self._notes
+        return self._special_notes
 
     @property
-    def space_already_allocated(self):
-        return self._space_already_allocated
+    def assigned(self):
+        return self._assigned
 
-    @space_already_allocated.setter
-    def space_already_allocated(self, space_allocated: bool):
-        self._space_already_allocated = space_allocated
+    @assigned.setter
+    def assigned(self, is_assigned: bool):
+        self._assigned = is_assigned
 
     @property
     def priority(self):

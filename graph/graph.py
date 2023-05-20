@@ -19,12 +19,12 @@ class Graph:
         return self.graph
 
     def add_vertex(self, vertex):
-        self.graph.add_node(vertex, [])
+        self.graph[vertex] = []
         self.size += 1
 
     def add_weighted_edge(self, source: Location, target: Location, weight: float):
         # Graph node with address as key and (target location, weight) tuple as value
-        source_node = self.graph.get_node(source)
+        source_node = self.graph[source]
         source_tuple = (target, weight)
         source_node.value.append(source_tuple)
         return self.graph
@@ -33,7 +33,7 @@ class Graph:
         return [vertex for vertex, edge_list in self.graph.items()]
 
     def get_weighted_edges(self, loc_object):
-        vertex = self.graph.get_node(loc_object)
+        vertex = self.graph[loc_object]
         return vertex.value
 
     def show_all_connections(self):

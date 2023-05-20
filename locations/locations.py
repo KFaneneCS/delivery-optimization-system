@@ -23,8 +23,8 @@ class Locations:
 
     def _add_adjacencies_from_data(self):
         for source_location, target_location, distance in self.loader.extract_source_target_weights():
-            source_node = self.locations_table.get_node(source_location)
-            target_node = self.locations_table.get_node(target_location)
+            source_node = self.locations_table[source_location]
+            target_node = self.locations_table[target_location]
             source_node.value.add_adjacent(target_node.value, distance)
             target_node.value.add_adjacent(source_node.value, distance)
 
@@ -39,11 +39,11 @@ class Locations:
 
     def add(self, address, zip_code):
         new_loc = Location(address.strip(), zip_code)
-        self.locations_table.add_node(new_loc.get_key(), new_loc)
+        self.locations_table[new_loc.get_key()] = new_loc
 
     def get_location(self, address):
         try:
-            return self.locations_table.get_node(address.strip()).value
+            return self.locations_table[address.strip()].value
         except AttributeError:
             for location in self.get_all_locations():
                 full_address = location.get_key()

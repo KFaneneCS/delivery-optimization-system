@@ -58,21 +58,21 @@ class Trucks:
         return None
 
     def load_packages(self, packages: List[Package], current_time: timedelta):
-        for package in packages:
-            truck_id = package.truck_id
-            truck = self.get_truck_by_id(truck_id)
-            if not truck:
-                raise ValueError(f'Package #{package.id} missing Truck assignment.')
-            if not package.space_already_allocated:
-                truck.current_capacity -= 1
-            if package.deadline is None:
-                # print(f'Package #{package.id} with NO deadline ---> {truck.id}')
-                truck.packages_without_deadlines_queue.insert(priority=package.priority, information=package)
-            else:
-                # print(f'Package #{package.id} WITH deadline ---> {truck.id}')
-                truck.packages_with_deadlines_queue.insert(priority=package.priority, information=package)
-            # truck.test_queue.insert(priority=package.priority, information=package)
-
-            if truck.driver and truck.departure_time <= self._start_time:
-                package.set_status(Package.STATUSES[2], current_time)
+        # for package in packages:
+        #     truck_id = package.truck_id
+        #     truck = self.get_truck_by_id(truck_id)
+        #     if not truck:
+        #         raise ValueError(f'Package #{package.id} missing Truck assignment.')
+        #     if not package.space_already_allocated:
+        #         truck.current_capacity -= 1
+        #     if package.deadline is None:
+        #         # print(f'Package #{package.id} with NO deadline ---> {truck.id}')
+        #         truck.packages_without_deadlines_queue.insert(priority=package.priority, information=package)
+        #     else:
+        #         # print(f'Package #{package.id} WITH deadline ---> {truck.id}')
+        #         truck.packages_with_deadlines_queue.insert(priority=package.priority, information=package)
+        #     # truck.test_queue.insert(priority=package.priority, information=package)
+        #
+        #     if truck.driver and truck.departure_time <= self._start_time:
+        #         package.set_status(Package.STATUSES[2], current_time)
         return

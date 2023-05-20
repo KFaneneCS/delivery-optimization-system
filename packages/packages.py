@@ -35,10 +35,10 @@ class Packages:
     def _associate_packages_to_locations(self):
         for package in self._packages:
             destination = package.destination
-            if not self._location_to_packages_table.get_node(destination):
-                self._location_to_packages_table.add_node(destination, [package])
+            if not self._location_to_packages_table[destination]:
+                self._location_to_packages_table[destination] = [package]
             else:
-                self._location_to_packages_table.get_node(destination).value.append(package)
+                self._location_to_packages_table[destination].value.append(package)
 
     @property
     def packages(self):
