@@ -68,12 +68,24 @@ class LinkedList:
         if (index > self._size - 1) or (index < 0):
             raise IndexError("Index out of bounds")
         if index == 0:
-            self._head = self._head.next
-            self._head.prev = None
-            return
+            if self._head.next is not None:
+                removed_node = self._head
+                self._head = self._head.next
+                self._head.prev = None
+                removed_node.next = None
+            else:
+                removed_node = self._head
+                self._head = None
+            self._size -= 1
+            return removed_node
         node = self.link_at(index)
-        node.prev.next, node.next.prev = node.next, node.prev
+        removed_node = node
+        node.prev.next = node.next
+        if node.next is not None:
+            node.next.prev = node.prev
+        removed_node.prev = removed_node.next = None
         self._size -= 1
+        return removed_node
 
     @property
     def head(self):

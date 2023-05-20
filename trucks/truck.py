@@ -15,8 +15,8 @@ class Truck:
         self._current_time = current_time
         self._current_location = current_location
         self._assigned_packages = []
+        self._packages_linked_list = LinkedList()
         self._miles_traveled = 0
-        self._test_queue = PriorityQueue(is_max=False)
         self._locations_to_packages_table = HashTable()
         self._seen_packages = HashTable()
         self._delivered_packages = []
@@ -33,11 +33,6 @@ class Truck:
         Current Time={self._current_time}
         Miles Traveled={self._miles_traveled}
         Capacity={self._current_capacity}'''
-
-    # FIXME: Test
-    @property
-    def test_queue(self):
-        return self._test_queue
 
     @property
     def id(self):
@@ -64,6 +59,10 @@ class Truck:
     @property
     def assigned_packages(self):
         return self._assigned_packages
+
+    @property
+    def packages_linked_list(self):
+        return self._packages_linked_list
 
     @property
     def current_location(self):

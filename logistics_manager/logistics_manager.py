@@ -256,27 +256,35 @@ class LogisticsManager:
         # test_preassignments()
 
     def _load_packages(self):
+        self._locations_to_packages_table.print_all()
 
         def get_deadline_as_miles(curr_time: timedelta, deadline_time: timedelta):
             remaining_time = deadline_time - curr_time
             remaining_distance = remaining_time.total_seconds() / 3600 * TRUCK_SPEED
             return remaining_distance
 
-
-        deadline = timedelta(hours=10, minutes=30)
-        print(get_deadline_as_miles(START_TIME, deadline))
         all_trucks = self._trucks.trucks
-        delayed_packages_queue = LinkedList()
-        non_delayed_packages_queue = LinkedList()
-
         for truck in all_trucks:
+            truck.packages_linked_list.add_link(value=self._hub, accumulated_distance=0)
+            curr_time = truck.departure_time
+
             # Separate packages with deadlines from packages without.
             subset_with_deadlines = [p.destination for p in truck.assigned_packages if p.deadline]
             subset_without_deadlines = [p.destination for p in truck.assigned_packages if not p.deadline]
 
             # Find the shortest path within the first subset, starting from the HUB.
-            x = self._hub_shortest_paths.get_closest_from_group(subset_with_deadlines)
-            print(x)
+            next_closest_loc, distance_to_next = self._hub_shortest_paths.get_closest_from_group(subset_with_deadlines)
+            while next_closest_loc:
+                # Add next closest location to truck's packages linked list if it wouldn't miss deadline.
+                packages_at_next_closest_loc = self._locations_to_packages_table[next_closest_loc].value
+                closest_deadline = min(packages_at_next_closest_loc, key=lambda p: p.deadline)
+                curr_last_link = truck.packages_linked_list.tail
+                deadline_in_miles = get_deadline_as_miles(curr_time, closest_deadline)
+                curr_distance_traveled = curr_last_link.accumulated_distance + distance_to_next
+                if curr_distance_traveled <= deadline_in_miles:
+                    truck.packages_linked_list.add_link(value=next_closest_loc, accumulated_distance=curr_distance_traveled)
+                else:
+                    # TODO:  Continue here.  Logic will be a bit complicated.
 
             # Then find the shortest path from last location of previous subset and add on 2nd subset (non-deadlines).
 
