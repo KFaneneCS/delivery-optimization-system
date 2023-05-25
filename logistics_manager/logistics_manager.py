@@ -253,7 +253,8 @@ class LogisticsManager:
 
         # test_preassignments()
 
-    def load_subset(self, subset, curr_truck, has_deadlines=False, is_truck_switch=False):
+    def load_subset(self, subset, curr_truck, has_deadlines=False):
+        print(f'\n\nLOAD SUBSET called for truck #{curr_truck.id}')
         excessive_distance = 6.0
         # Chain previous subset (if it exists) with current subset.
         if not has_deadlines and curr_truck.packages_queue.get_size() > 1:
@@ -265,16 +266,13 @@ class LogisticsManager:
             # Find the shortest path within the first subset, starting from the HUB.
             next_closest_loc, distance_to_next = self._hub_shortest_paths.get_closest_from_group(subset)
         while next_closest_loc:
-
-            if not is_truck_switch:
-                curr_time = curr_truck.tracked_current_time
-            else:
-                curr_time = curr_truck.current_time
+            curr_time = curr_truck.tracked_current_time
             # print(f'current time:  {curr_time}')
             curr_loc = next_closest_loc
             # Add next closest location to truck's packages linked list if it wouldn't miss deadline.
             packages_at_next_closest_loc = [p for p in self._locations_to_packages_table[curr_loc].value
                                             if not p.wrong_address]
+            print(packages_at_next_closest_loc)
             # Move current group to first idle truck if it would add significant mileage to current truck.
             if not has_deadlines and distance_to_next >= excessive_distance and curr_truck.driver:
                 truck_3: Truck = self._trucks.get_truck_by_id(3)
@@ -285,12 +283,14 @@ class LogisticsManager:
                 next_shortest_paths = self._all_shortest_paths[curr_loc].value
                 next_closest_loc, distance_to_next = next_shortest_paths.get_closest_from_group(subset)
             else:
+                print('CHECK')
                 closest_deadline_package = None
                 if has_deadlines:
                     curr_packages_with_deadlines = [p for p in packages_at_next_closest_loc if p.deadline]
                     closest_deadline_package = min(curr_packages_with_deadlines, key=lambda p: p.deadline)
                 travel_time = self.miles_to_time(distance_to_next)
                 curr_travel_distance = sum(info[1] for info in curr_truck.packages_queue) + distance_to_next
+                print(curr_travel_distance)
                 if not has_deadlines or (has_deadlines and
                                          curr_time + travel_time <= closest_deadline_package.deadline):
                     curr_truck.load_bundle(packages_at_next_closest_loc, distance_to_next, curr_travel_distance)
@@ -301,10 +301,7 @@ class LogisticsManager:
                 # Remove current location from current subset
                 subset.remove(curr_loc)
                 curr_time += self.miles_to_time(distance_to_next)
-                if not is_truck_switch:
-                    curr_truck.tracked_current_time = curr_time
-                else:
-                    curr_truck.current_time = curr_time
+                curr_truck.tracked_current_time = curr_time
                 next_shortest_paths = self._all_shortest_paths[curr_loc].value
                 next_closest_loc, distance_to_next = next_shortest_paths.get_closest_from_group(subset)
 
@@ -346,7 +343,7 @@ class LogisticsManager:
         truck.load_bundle(packages=None, distance_to_next=0, curr_travel_distance=-1)
         full_set = list(set(p.destination for p in truck.assigned_packages if not p.wrong_address))
         wrong_address_packages = list(set(p for p in truck.assigned_packages if p.wrong_address))
-        self.load_subset(full_set, truck, has_deadlines=False, is_truck_switch=True)
+        self.load_subset(full_set, truck, has_deadlines=False)
         for package in wrong_address_packages:
             truck.load_bundle(packages=[package], distance_to_next=math.inf, curr_travel_distance=math.inf)
 
@@ -423,7 +420,7 @@ class LogisticsManager:
 
             # Switch drivers and load idle truck at hub.
             next_truck = trucks_without_drivers[0]
-            next_truck.current_time = next_truck.departure_time = curr_time
+            next_truck.current_time = next_truck.departure_time = next_truck.tracked_current_time = curr_time
             self.load_idle_truck(next_truck)
             next_truck.driver, truck.driver = truck.driver, None
             print(f'\nTruck #{next_truck.id} heading out of {next_truck.current_location} @ {next_truck.current_time} ')
