@@ -1,4 +1,5 @@
 from datetime import datetime, date, time, timedelta
+from typing import List
 from locations.location import Location
 from packages.package import Package
 from data_structures.priority_queue import PriorityQueue
@@ -13,14 +14,17 @@ class Truck:
         self._id = id_
         self._driver = driver
         self._current_time = current_time
-        self._current_location = current_location
+        self._current_location = None
+        self._location_by_time_list = []
+        self.set_current_location(current_location, current_time)
+        self._tracked_current_time = self._current_time
         self._assigned_packages = []
+        self._packages_queue = PriorityQueue(is_max=False)
         self._packages_linked_list = LinkedList()
         self._miles_traveled = 0
         self._locations_to_packages_table = HashTable()
         self._seen_packages = HashTable()
         self._delivered_packages = []
-        self._location_by_time_list = []
         self._departure_time = self._current_time
         self._MAX_CAPACITY = 16
         self._current_capacity = self.MAX_CAPACITY
@@ -57,14 +61,6 @@ class Truck:
         self._current_time = current_time
 
     @property
-    def assigned_packages(self):
-        return self._assigned_packages
-
-    @property
-    def packages_linked_list(self):
-        return self._packages_linked_list
-
-    @property
     def current_location(self):
         return self._current_location
 
@@ -73,6 +69,32 @@ class Truck:
         if not isinstance(current_location, Location):
             raise ValueError('Invalid "current location" value.')
         self._current_location = current_location
+
+    @property
+    def tracked_current_time(self):
+        return self._tracked_current_time
+
+    @tracked_current_time.setter
+    def tracked_current_time(self, tracked_time: timedelta):
+        if not isinstance(tracked_time, timedelta):
+            raise ValueError('Invalid "tracked current time" value.')
+        self._tracked_current_time = tracked_time
+
+    @property
+    def assigned_packages(self):
+        return self._assigned_packages
+
+    @assigned_packages.setter
+    def assigned_packages(self, assigned_packages: List[Package]):
+        self._assigned_packages = assigned_packages
+
+    @property
+    def packages_queue(self):
+        return self._packages_queue
+
+    @property
+    def packages_linked_list(self):
+        return self._packages_linked_list
 
     @property
     def miles_traveled(self):
@@ -127,13 +149,49 @@ class Truck:
 
         self._current_capacity = new_curr_capacity
 
+    def set_current_location(self, curr_location: Location, curr_time: timedelta):
+        self._current_location = curr_location
+        self._location_by_time_list.append((curr_location, curr_time))
+
     def add_assigned_package(self, package: Package):
-        if self.current_capacity - len(self.assigned_packages) == 0:
-            raise RuntimeError(f'Not enough capacity in truck #{self.id} to assign package #{package.id}')
+        if self.current_capacity - len(self._assigned_packages) == 0:
+            raise RuntimeError(f'Not enough capacity in truck #{self._id} to assign package #{package.id}')
         if package.assigned:
             raise RuntimeError(f'Package #{package.id} was already assigned!')
-        self.assigned_packages.append(package)
+
+        self._assigned_packages.append(package)
         package.assigned = True
 
-    def load_package(self, package: Package):
-        print(f'Need to load Package #{package.id} to Truck {self.id}')
+    def remove_assigned_package(self, package: Package):
+        if package not in self._assigned_packages:
+            raise ValueError(f'Package #{package.id} is not assigned to truck #{self._id}')
+        else:
+            self._assigned_packages.remove(package)
+            package.assigned = False
+
+    def load_bundle(self, packages: List[Package], distance_to_next: float, curr_travel_distance: float):
+        if not isinstance(distance_to_next, (int, float)):
+            raise ValueError('Invalid "distance to next" value.')
+        if not isinstance(curr_travel_distance, (int, float)):
+            raise ValueError('Invalid "current travel distance" value.')
+        if not packages:
+            return
+
+        num_packages = len(packages)
+        if self._current_capacity - num_packages < 0:
+            raise RuntimeError(f'Truck {self._id} does not have enough capacity to load:\n{packages}')
+        self.packages_queue.insert(priority=curr_travel_distance, information=(packages, distance_to_next))
+        self._current_capacity -= num_packages
+        if packages and self._driver:
+            for package in packages:
+                if package.status == 'En Route':
+                    raise RuntimeError(f'Package #{package.id} is already En Route!')
+                package.set_status(Package.STATUSES[2], self._departure_time)
+                package.truck_id = self._id
+
+    def deliver_package(self, package: Package, current_time: timedelta):
+        if package.status == 'Delivered':
+            raise RuntimeError(f'Package #{package.id} was already delivered!  ({current_time})')
+        package.set_status(Package.STATUSES[3], current_time)
+        self._delivered_packages.append(package)
+        self._current_capacity += 1

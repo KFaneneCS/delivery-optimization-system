@@ -94,9 +94,6 @@ class Dijkstra:
         self.all_paths[target_location] = path
         return path
 
-    def get_shortest_path_distance(self, target_location) -> float:
-        return self.all_paths[target_location].value[-1][1]
-
     def get_dist_and_prev(self, target):
         node = self._distance_table[target]
         weight = node.value[0]
@@ -112,13 +109,14 @@ class Dijkstra:
                 curr_closest = target
         return curr_closest, min_distance
 
-    def get_closest_from_group(self, group: List[Package]):
+    def get_closest_from_group(self, group: List[Location]):
         min_distance = math.inf
         curr_closest = None
-        for target, (distance, _) in self._distance_table.items():
-            if target in group and distance < min_distance and distance != 0:
+        for location in group:
+            distance, _ = self._distance_table[location].value
+            if distance != 0 and distance < min_distance:
                 min_distance = distance
-                curr_closest = target
+                curr_closest = location
         return curr_closest, min_distance
 
     def get_max_distance(self):

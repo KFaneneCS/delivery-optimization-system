@@ -108,4 +108,5 @@ class Package:
         if new_status not in self.STATUSES:
             raise ValueError(f'Invalid status: {new_status}.')
         self._status = new_status
+        # print(f'Status set for Package #{self._id} @ {curr_time} to {new_status}')
         self._status_at_times.append((curr_time, new_status))

@@ -88,6 +88,9 @@ class PriorityQueue:
         except IndexError:
             return None
 
+    def peek_last(self):
+        return self._queue[-1].information
+
     def contains(self, information):
         for i, node in enumerate(self._queue):
             if node.information == information:
