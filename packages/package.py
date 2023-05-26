@@ -1,4 +1,5 @@
 from datetime import timedelta
+
 from locations.location import Location
 
 
@@ -14,9 +15,9 @@ class Package:
         self._assigned = False
         self._truck_id = None
         self._wrong_address = False
+        self._not_special = False
         self._priority = None
         self._status = None
-        self._ready_time = timedelta(hours=0, minutes=0)
         self._status_at_times = []
 
     def __repr__(self):
@@ -82,6 +83,17 @@ class Package:
     def wrong_address(self, has_wrong_address: bool):
         self._wrong_address = has_wrong_address
 
+    @property
+    def not_special(self):
+        return self._not_special
+
+    @not_special.setter
+    def not_special(self, is_not_special: bool):
+        if not isinstance(is_not_special, bool):
+            raise ValueError('Invalid "is not special" value.')
+
+        self._not_special = is_not_special
+
     @classmethod
     def get_statuses(cls):
         return cls.STATUSES
@@ -89,16 +101,6 @@ class Package:
     @property
     def status(self):
         return self._status
-
-    @property
-    def ready_time(self):
-        return self._ready_time
-
-    @ready_time.setter
-    def ready_time(self, ready_time: timedelta):
-        if not isinstance(ready_time, timedelta):
-            raise ValueError('Invalid "ready time" value.')
-        self._ready_time = ready_time
 
     @property
     def status_at_times(self):

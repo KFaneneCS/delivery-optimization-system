@@ -1,10 +1,10 @@
-from datetime import datetime, date, time, timedelta
+from datetime import timedelta
 from typing import List
+
+from data_structures.hash import HashTable
+from data_structures.priority_queue import PriorityQueue
 from locations.location import Location
 from packages.package import Package
-from data_structures.priority_queue import PriorityQueue
-from data_structures.linked_list import LinkedList
-from data_structures.hash import HashTable
 from .driver import Driver
 
 
@@ -16,11 +16,10 @@ class Truck:
         self._current_time = current_time
         self._current_location = None
         self._location_by_time_list = []
-        self.set_current_location(current_location, current_time)
+        self.set_current_location(current_location, current_time, 0)
         self._tracked_current_time = self._current_time
         self._assigned_packages = []
         self._packages_queue = PriorityQueue(is_max=False)
-        self._packages_linked_list = LinkedList()
         self._miles_traveled = 0
         self._locations_to_packages_table = HashTable()
         self._seen_packages = HashTable()
@@ -93,10 +92,6 @@ class Truck:
         return self._packages_queue
 
     @property
-    def packages_linked_list(self):
-        return self._packages_linked_list
-
-    @property
     def miles_traveled(self):
         return self._miles_traveled
 
@@ -131,6 +126,8 @@ class Truck:
         if not isinstance(departure_time, timedelta):
             raise ValueError('Invalid "departure time" value.')
         self._departure_time = departure_time
+        self._location_by_time_list.pop()
+        self.set_current_location(self._current_location, self._departure_time, 0)
 
     @property
     def MAX_CAPACITY(self):
@@ -149,9 +146,9 @@ class Truck:
 
         self._current_capacity = new_curr_capacity
 
-    def set_current_location(self, curr_location: Location, curr_time: timedelta):
+    def set_current_location(self, curr_location: Location, curr_time: timedelta, miles_traveled: float):
         self._current_location = curr_location
-        self._location_by_time_list.append((curr_location, curr_time))
+        self._location_by_time_list.append((curr_location, curr_time, miles_traveled))
 
     def add_assigned_package(self, package: Package):
         if self.current_capacity - len(self._assigned_packages) == 0:

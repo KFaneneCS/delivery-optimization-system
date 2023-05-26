@@ -1,14 +1,16 @@
+import bisect
 from datetime import datetime, timedelta
-from .package import Package
-from locations.locations import Locations
-from data_structures.hash import HashTable
+
 from data.packages_loader import PackagesLoader
-from graph.dijkstra import Dijkstra
+from data_structures.hash import HashTable
+from locations.locations import Locations
+from .package import Package
 
 
 class Packages:
     def __init__(self, package_csv: str, locations: Locations):
-        self._packages = []
+        self._packages = HashTable(80)
+        self._packages_list = []
         self._loader = PackagesLoader(package_csv)
         self._locations = locations
         self._priority_queue = None
@@ -28,12 +30,13 @@ class Packages:
                     deadline = None
                 kilos = int(dataset[6])
                 requirement_notes = dataset[7]
-                self.packages.append(Package(package_id, destination, deadline, kilos, requirement_notes))
+                new_package = Package(package_id, destination, deadline, kilos, requirement_notes)
+                self._packages[package_id] = new_package
             except (IndexError, ValueError) as e:
                 print(f'Error {e} at {dataset}.')
 
     def _associate_packages_to_locations(self):
-        for package in self._packages:
+        for _, package in self._packages.items():
             destination = package.destination
             if not self._location_to_packages_table[destination]:
                 self._location_to_packages_table[destination] = [package]
@@ -41,25 +44,23 @@ class Packages:
                 self._location_to_packages_table[destination].value.append(package)
 
     @property
-    def packages(self):
-        return self._packages
-
-    @property
-    def priority_queue(self):
-        return self._priority_queue
-
-    @property
     def locations_to_packages_table(self):
         return self._location_to_packages_table
 
-    def get_num_packages(self):
-        return len(self._packages)
+    def get_all(self):
+        if not self._packages_list:
+            for _, package in self._packages.items():
+                bisect.insort(self._packages_list, package, key=lambda p: p.id)
+        return self._packages_list
 
-    def get_package_by_id(self, package_id):
-        for package in self.packages:
-            if package.id == package_id:
-                return package
-        return None
+    def get_by_id(self, id_: int):
+        if not isinstance(id_, int):
+            raise ValueError('Invalid ID value.')
+
+        return self._packages[id_].value
+
+    def get_num_packages(self):
+        return self._packages.get_size()
 
     def get_all_statuses_by_time(self):
         for package in self._packages:

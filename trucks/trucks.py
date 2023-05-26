@@ -1,10 +1,10 @@
-from typing import List
 from datetime import timedelta
-from data_structures.linked_list import LinkedList
-from .truck import Truck
+from typing import List
+
+from locations.location import Location
 from packages.package import Package
 from .driver import Driver
-from locations.location import Location
+from .truck import Truck
 
 
 class Trucks:

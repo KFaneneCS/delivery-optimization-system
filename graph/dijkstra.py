@@ -1,10 +1,9 @@
 import math
-
 from typing import List
+
 from data_structures.hash import HashTable
 from data_structures.priority_queue import PriorityQueue
 from locations.location import Location
-from packages.package import Package
 from .graph import Graph
 
 
@@ -59,7 +58,8 @@ class Dijkstra:
                     if min_dist_to_curr + dist_neighbor_to_curr < dist_start_to_curr:
                         # print(f'*****UPDATING***** distance to neighbor_node node')
                         new_min_dist = round(min_dist_to_curr + dist_neighbor_to_curr, ndigits=3)
-                        self._distance_table.change_node(unhashed_key=neighbor_node, new_value=(new_min_dist, curr_node))
+                        self._distance_table.change_node(unhashed_key=neighbor_node,
+                                                         new_value=(new_min_dist, curr_node))
                         self.priority_queue.change_priority(priority=new_min_dist, information=neighbor_node)
 
             self.unvisited.remove(curr_node)
