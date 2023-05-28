@@ -123,7 +123,7 @@ class LogisticsManager:
         for i in range(len(special_notes)):
             self._special_cases[special_notes[i]] = special_note_handlers[i]
 
-        for package in self._packages.get_all():
+        for package in self._packages.get_all_as_list():
             curr_notes = package.special_notes
             for note, handling_method in self._special_cases.items():
                 if curr_notes.startswith(note):
@@ -137,7 +137,7 @@ class LogisticsManager:
         return self._special_cases
 
     def _group_packages_by_destination(self):
-        for package in self._packages.get_all():
+        for package in self._packages.get_all_as_list():
             if not package.wrong_address:
                 if not self._packages_by_destination[package.destination]:
                     self._packages_by_destination[package.destination] = [package]
@@ -186,7 +186,7 @@ class LogisticsManager:
         assign_to_truck_1 = True
         # Assign remaining packages with deadlines to truck 1 (earliest to leave) if possible, otherwise truck 2 if
         # possible, otherwise to the first truck without a driver that has capacity.
-        remaining_packages_with_deadline = [p for p in self._packages.get_all() if p.deadline and not p.assigned]
+        remaining_packages_with_deadline = [p for p in self._packages.get_all_as_list() if p.deadline and not p.assigned]
         for package_with_deadline in remaining_packages_with_deadline:
             packages_with_same_destination = self._packages_by_destination[package_with_deadline.destination].value
             packages_to_add = []
@@ -212,7 +212,7 @@ class LogisticsManager:
                 assigned_packages[pckg_to_add] = truck
 
         # Assign all remaining packages to trucks where available.
-        for package in self._packages.get_all():
+        for package in self._packages.get_all_as_list():
             if not package.assigned and not assigned_packages[package]:
                 group_by_destination = self._packages_by_destination[package.destination].value
                 truck = get_best_available_truck(group_by_destination)
@@ -252,7 +252,6 @@ class LogisticsManager:
                 for package_at_next in packages_at_next_closest_loc:
                     curr_truck.remove_assigned_package(package_at_next)
                     truck_3.add_assigned_package(package_at_next)
-                    print(truck_3.assigned_packages)
                 subset.remove(curr_loc)
                 next_shortest_paths = self._all_shortest_paths[curr_loc].value
                 next_closest_loc, distance_to_next = next_shortest_paths.get_closest_from_group(subset)
@@ -297,7 +296,7 @@ class LogisticsManager:
 
     def deliver_packages(self):
         def update_wrong_address_packages():
-            packages_to_update = [p for p in self._packages.get_all() if p.wrong_address]
+            packages_to_update = [p for p in self._packages.get_all_as_list() if p.wrong_address]
             for package in packages_to_update:
                 package.destination = self._locations.get_location(CORRECTED_ADDRESS)
                 package.wrong_address = False
@@ -383,22 +382,28 @@ class LogisticsManager:
 
             complete_route(next_truck, curr_time, curr_location)
 
-        def timedelta_to_time(td: timedelta):
-            total_seconds = td.total_seconds()
-            hours = total_seconds // 3600
-            minutes = (total_seconds % 3600) // 60
-            seconds = total_seconds % 60
-            return time(int(hours), int(minutes), int(seconds))
+        # def timedelta_to_time(td: timedelta):
+        #     total_seconds = td.total_seconds()
+        #     hours = total_seconds // 3600
+        #     minutes = (total_seconds % 3600) // 60
+        #     seconds = total_seconds % 60
+        #     return time(int(hours), int(minutes), int(seconds))
+        #
+        # def calculate_miles_from_time(time: timedelta):
+        #     return time.total_seconds() / 3600 * TRUCK_SPEED
+        #
+        # for truck in self._trucks.trucks:
+        #     print(truck)
+        #     for loc, t, m in truck.location_by_time_list:
+        #         print(f'{loc} | {timedelta_to_time(t)} | {m}')
+        #
+        # for package in self._packages.get_all():
+        #     print(f'Package #{package.id}  on Truck #{package.truck_id}')
+        #     for td, status in package.status_at_times:
+        #         print(f'{timedelta_to_time(td)} | {status}')
 
-        def calculate_miles_from_time(time: timedelta):
-            return time.total_seconds() / 3600 * TRUCK_SPEED
+    def get_packages(self):
+        return self._packages
 
-        for truck in self._trucks.trucks:
-            print(truck)
-            for loc, t, m in truck.location_by_time_list:
-                print(f'{loc} | {timedelta_to_time(t)} | {m}')
-
-        for package in self._packages.get_all():
-            print(f'Package #{package.id}  on Truck #{package.truck_id}')
-            for td, status in package.status_at_times:
-                print(f'{timedelta_to_time(td)} | {status}')
+    def get_trucks(self):
+        return self._trucks

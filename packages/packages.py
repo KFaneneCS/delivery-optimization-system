@@ -23,6 +23,9 @@ class Packages:
             try:
                 package_id = int(dataset[0])
                 destination = self._locations.get_location(dataset[1].strip())
+                city = dataset[2]
+                state = dataset[3]
+                zip_code = dataset[4]
                 if dataset[5] != 'EOD':
                     deadline_dt = datetime.strptime(dataset[5], '%I:%M %p').time()
                     deadline = timedelta(hours=deadline_dt.hour, minutes=deadline_dt.minute)
@@ -30,7 +33,7 @@ class Packages:
                     deadline = None
                 kilos = int(dataset[6])
                 requirement_notes = dataset[7]
-                new_package = Package(package_id, destination, deadline, kilos, requirement_notes)
+                new_package = Package(package_id, destination, city, state, zip_code, deadline, kilos, requirement_notes)
                 self._packages[package_id] = new_package
             except (IndexError, ValueError) as e:
                 print(f'Error {e} at {dataset}.')
@@ -47,11 +50,14 @@ class Packages:
     def locations_to_packages_table(self):
         return self._location_to_packages_table
 
-    def get_all(self):
+    def get_all_as_list(self):
         if not self._packages_list:
             for _, package in self._packages.items():
                 bisect.insort(self._packages_list, package, key=lambda p: p.id)
         return self._packages_list
+
+    def get_all_as_table(self):
+        return self._packages
 
     def get_by_id(self, id_: int):
         if not isinstance(id_, int):

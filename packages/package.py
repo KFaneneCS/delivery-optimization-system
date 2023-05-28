@@ -6,9 +6,13 @@ from locations.location import Location
 class Package:
     STATUSES = ['At Hub', 'Delayed', 'En Route', 'Delivered']
 
-    def __init__(self, id_: int, destination: Location, deadline: timedelta, kilos: int, notes: str):
+    def __init__(self, id_: int, destination: Location, city: str, state: str, zip_code: str, deadline: timedelta,
+                 kilos: int, notes: str):
         self._id = id_
         self._destination = destination
+        self._city = city
+        self._state = state
+        self._zip_code = zip_code
         self._deadline = deadline
         self._kilos = kilos
         self._special_notes = notes
@@ -112,3 +116,14 @@ class Package:
         self._status = new_status
         # print(f'Status set for Package #{self._id} @ {curr_time} to {new_status}')
         self._status_at_times.append((curr_time, new_status))
+
+    def get_status(self, curr_time: timedelta):
+        for td, status in reversed(self._status_at_times):
+            if curr_time >= td:
+                return status
+        return None
+
+    def display_info(self):
+        print(f'ID={self._id} | Delivery Address={self.destination.address} | Delivery Deadline={self._deadline} | '
+              f'Delivery City={self._city} | Delivery Zip Code={self._zip_code} | Package Weight={self._kilos} kilos')
+

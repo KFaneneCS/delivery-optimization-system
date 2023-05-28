@@ -1,6 +1,7 @@
 # Kyle Fanene - 006246401
 
 from logistics_manager.logistics_manager import LogisticsManager
+from user_interface.ui import UI
 
 if __name__ == '__main__':
     locations_file = 'data/distance_table.csv'
@@ -9,3 +10,12 @@ if __name__ == '__main__':
     logistics_manager = LogisticsManager(locations_file, packages_file)
     logistics_manager.load_packages()
     logistics_manager.deliver_packages()
+    packages = logistics_manager.get_packages()
+    trucks = logistics_manager.get_trucks()
+
+    ui = UI(packages, trucks)
+    # ui.show_all_statuses_at_time('09:00')
+    # ui.show_all_statuses_at_time('10:00')
+    # ui.show_all_statuses_at_time('12:30')
+
+    ui.execute()
