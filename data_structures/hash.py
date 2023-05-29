@@ -70,9 +70,10 @@ class _HashNode:
 
 class HashTable:
     """
-    A class representing a hash function that provides a Python dictionary-like implementation. This implementation
-    includes a rehash() function that will resize the table to better distribute nodes once its load factor is
-    exceeded. Standard methods for getting nodes, setting nodes, changing nodes, etc. are provided.
+    A class representing a hash function that provides a Python dictionary-like implementation.
+
+    This implementation includes a rehash() function that will resize the table to better distribute nodes once its
+    load factor is exceeded. Standard methods for getting nodes, setting nodes, changing nodes, etc. are provided.
     """
     def __init__(self, table_size: int = 37, load_factor: float = 0.75):
         """
@@ -105,6 +106,7 @@ class HashTable:
     def _get_node(self, unhashed_key):
         """
         Hashes the provided key, then finds and returns the corresponding node.
+
         Implements the move-to-front strategy for increased efficiency.
         :param unhashed_key: Key associated with node before hashing.
         :return: The corresponding node if it exists, otherwise None.
@@ -149,8 +151,10 @@ class HashTable:
 
     def _generate_hash(self, unhashed_key):
         """
-        The primary logic of the hash data structure. Takes the sum of each character's integer value representing its
-        Unicode character, then takes that value with respect to the size of the table to determine its position.
+        The primary logic of the hash data structure.
+
+        Takes the sum of each character's integer value representing its Unicode character, then takes that value with
+        respect to the size of the table to determine its position.
         :param unhashed_key: Key to be hashed.
         :return: The calculated index after determining the key's hash value.
         """
@@ -160,13 +164,27 @@ class HashTable:
         return h % self._table_size
 
     def get_size(self):
+        """
+        Returns the total number of nodes in the hash table.
+        :return: The total number of nodes in the hash table.
+        """
         return self._num_nodes
 
     def items(self):
+        """
+        Iterates through all nodes and returns each node's key and value as a tuple.
+
+        Intended to replicate Python's items() method for dictionaries.
+        :return: Each node's key and value as a tuple.
+        """
         for node in self.get_all():
             yield node.key, node.value
 
     def rehash(self):
+        """
+        A self-adjusting function that resizes the table and redistributes the nodes after the load factor is met or
+        exceeded.
+        """
         temp_table = self._table
 
         self._table_size *= 2
@@ -182,6 +200,11 @@ class HashTable:
                     node = node.next
 
     def delete(self, unhashed_key):
+        """
+        Deletes a node in the table corresponding to the provided unhashed key.
+        :param unhashed_key: The unhashed key of the node to be deleted.
+        :return: The deleted node, or None if no node was found.
+        """
         hashed_key = self._generate_hash(str(unhashed_key))
         curr_node = self._table[hashed_key]
         prev_node = None
@@ -198,7 +221,13 @@ class HashTable:
                 return curr_node
         return None
 
-    def has_node(self, unhashed_key):
+    def has_node(self, unhashed_key) -> bool:
+        """
+        A boolean function that returns True if a node exists with the provided unhashed key passed as a parameter,
+        otherwise False.
+        :param unhashed_key: The unhashed key of the node in the table if it exists.
+        :return: True if a node exists with the provided unhashed key, otherwise False.
+        """
         hashed_key = self._generate_hash(str(unhashed_key))
         curr_node = self._table[hashed_key]
         while curr_node:
@@ -208,6 +237,11 @@ class HashTable:
         return False
 
     def change_node(self, unhashed_key, new_value):
+        """
+        Alters the value of an existing node.
+        :param unhashed_key: The unhashed key of the node to be changed.
+        :param new_value: The new value to replace the current value of the existing node.
+        """
         node = self._get_node(unhashed_key)
         if node is not None:
             node.value = new_value
@@ -215,6 +249,10 @@ class HashTable:
             self._add_node(unhashed_key, new_value)
 
     def get_all(self):
+        """
+        Iterates through all nodes and returns each one.
+        :return: Each node in the table.
+        """
         for node in self._table:
             if not node:
                 pass
@@ -223,4 +261,7 @@ class HashTable:
                 node = node.next
 
     def print_all(self):
+        """
+        Prints all nodes in the table to console.
+        """
         print([node for node in self.get_all()])

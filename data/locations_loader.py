@@ -32,8 +32,9 @@ class LocationsLoader:
 
     def extract_full_addresses(self) -> List:
         """
-        Extracts each location's full address from our loaded data.  The initial "HUB" location is manually added for
-        simplicity.
+        Extracts each location's full address from our loaded data.
+
+        The initial "HUB" location is manually added for simplicity.
         :return: Full addresses as list.
         """
         full_addresses = ['HUB\n(84107)']
