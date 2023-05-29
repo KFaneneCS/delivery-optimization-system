@@ -8,6 +8,9 @@ from .graph import Graph
 
 
 class Dijkstra:
+    """
+
+    """
 
     def __init__(self, start: Location, graph: Graph):
         self._start = start
@@ -35,28 +38,25 @@ class Dijkstra:
             self.unvisited.add(vertex)
 
     @property
-    def start(self):
+    def start(self) -> Location:
         return self._start
+
+    @property
+    def distance_table(self):
+        return self._distance_table
 
     def _execute(self):
         while self.unvisited:
-            # print(f'\nNumber of unvisited: {len(self.unvisited)}')
             curr_node = self.priority_queue.get()
-            # print(f'   Current in queue:  {curr_node}')
-            # print(f'       In unvisited? ~{curr_node in self.unvisited}')
             min_dist_to_curr = self.get_dist_and_prev(curr_node)[0]
-            # print(f" Current's distance from source = {min_dist_to_curr}")
 
             for edge_to_neighbor in self.graph.get_weighted_edges(curr_node):
                 neighbor_node = edge_to_neighbor[0]
 
                 if neighbor_node not in self.visited:
                     dist_neighbor_to_curr = edge_to_neighbor[1]
-                    # print(f' * Neighbor: {neighbor_node}')
                     dist_start_to_curr = self.get_dist_and_prev(neighbor_node)[0]
-                    # print(f'        From curr_node: {dist_neighbor_to_curr} | From start: {dist_start_to_curr}')
                     if min_dist_to_curr + dist_neighbor_to_curr < dist_start_to_curr:
-                        # print(f'*****UPDATING***** distance to neighbor_node node')
                         new_min_dist = round(min_dist_to_curr + dist_neighbor_to_curr, ndigits=3)
                         self._distance_table.change_node(unhashed_key=neighbor_node,
                                                          new_value=(new_min_dist, curr_node))
@@ -64,16 +64,10 @@ class Dijkstra:
 
             self.unvisited.remove(curr_node)
             self.visited.add(curr_node)
-        return self
 
     def _find_all_shortest_paths(self):
         for target_location, _ in self._distance_table.items():
             self.get_shortest_path(target_location)
-        return self
-
-    @property
-    def distance_table(self):
-        return self._distance_table
 
     def get_shortest_path(self, target_location):
         if self.all_paths.has_node(target_location):

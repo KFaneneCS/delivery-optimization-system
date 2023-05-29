@@ -221,6 +221,13 @@ class HashTable:
                 return curr_node
         return None
 
+    def delete_all(self):
+        """
+        Deletes all nodes in hash table.
+        """
+        self._table = [None] * self._table_size
+        self._num_nodes = 0
+
     def has_node(self, unhashed_key) -> bool:
         """
         A boolean function that returns True if a node exists with the provided unhashed key passed as a parameter,
