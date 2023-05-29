@@ -192,3 +192,33 @@ class Truck:
         package.set_status(Package.STATUSES[3], current_time)
         self._delivered_packages.append(package)
         self._current_capacity += 1
+
+    def get_curr_location_and_mileage(self, curr_time: timedelta):
+        in_transit = False
+        n = len(self._location_by_time_list)
+
+        if curr_time < self._departure_time:
+            curr_time = self._departure_time
+
+        for i in range(n):
+            location, arrival_time, dist_travelled = self._location_by_time_list[i]
+
+            # If the current time (rounded to the nearest minute) is one of our arrival times, then we are at that
+            # location and dropping off a package. Or, if we have reached the end of our list, then the truck's route
+            # is complete and its last location and distance travelled represent its final status.
+            if (curr_time.total_seconds() // 60 == arrival_time.total_seconds() // 60) or i == (n - 1):
+                return location, dist_travelled, in_transit
+
+            if i > 0:
+                prev_location, prev_arrival_time, prev_dist_travelled = self._location_by_time_list[i - 1]
+
+                if prev_arrival_time < curr_time < arrival_time:
+                    in_transit = True
+
+                    time_diff = arrival_time - prev_arrival_time
+                    dist_diff = dist_travelled - prev_dist_travelled
+
+                    time_ratio = (curr_time - prev_arrival_time) / time_diff
+                    actual_dist_travelled = prev_dist_travelled + (dist_diff * time_ratio)
+
+                    return location, actual_dist_travelled, in_transit

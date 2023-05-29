@@ -14,8 +14,4 @@ if __name__ == '__main__':
     trucks = logistics_manager.get_trucks()
 
     ui = UI(packages, trucks)
-    # ui.show_all_statuses_at_time('09:00')
-    # ui.show_all_statuses_at_time('10:00')
-    # ui.show_all_statuses_at_time('12:30')
-
     ui.execute()

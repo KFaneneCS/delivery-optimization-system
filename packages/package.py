@@ -4,7 +4,7 @@ from locations.location import Location
 
 
 class Package:
-    STATUSES = ['At Hub', 'Delayed', 'En Route', 'Delivered']
+    STATUSES = ['At the Hub', 'Delayed', 'En Route', 'Delivered']
 
     def __init__(self, id_: int, destination: Location, city: str, state: str, zip_code: str, deadline: timedelta,
                  kilos: int, notes: str):
