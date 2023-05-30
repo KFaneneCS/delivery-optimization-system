@@ -55,7 +55,7 @@ class Packages:
                 new_package = Package(package_id, destination, city, state, zip_code, deadline, kilos,
                                       requirement_notes)
                 self._packages[package_id] = new_package
-            except (IndexError, ValueError) as e:
+            except (IndexError, ValueError):
                 raise
 
     def _associate_packages_to_locations(self):

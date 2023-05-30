@@ -188,7 +188,7 @@ class Package:
         self._not_special = is_not_special
 
     @classmethod
-    def get_statuses(cls):
+    def get_status_options(cls):
         """
         Returns all possible status options for the Package class.
         :return: All possible status options for the Package class.
@@ -243,5 +243,8 @@ class Package:
         """
         Prints specific package information to console.  Intended for the user as part of the UI experience.
         """
-        print(f'ID={self._id} | Delivery Address={self.destination.address} | Delivery Deadline={self._deadline} | '
-              f'Delivery City={self._city} | Delivery Zip Code={self._zip_code} | Package Weight={self._kilos} kilos')
+        print(f'\tID={self._id}\n'
+              f'\tDelivery Address={self.destination.address}\n'
+              f'\tDelivery City={self._city} | Delivery Zip Code={self._zip_code}\n'
+              f'\tDelivery Deadline={self._deadline}\n'
+              f'\tPackage Weight={self._kilos} kilos')

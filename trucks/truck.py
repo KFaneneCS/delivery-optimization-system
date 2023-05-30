@@ -219,7 +219,6 @@ class Truck:
         if not isinstance(departure_time, timedelta):
             raise ValueError('Invalid "departure time" value.')
         self._departure_time = departure_time
-        # TODO:  May need to fix this
         self._location_by_time_list.pop()
         self.set_current_location(self._current_location, self._departure_time, 0)
 

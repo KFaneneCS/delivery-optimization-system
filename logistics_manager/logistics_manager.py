@@ -1,7 +1,7 @@
 import math
 import re
 import warnings
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta
 
 from data_structures.hash import HashTable
 from graph.dijkstra import Dijkstra
@@ -19,7 +19,23 @@ CORRECTED_ADDRESS = '410 S State St'
 
 
 class LogisticsManager:
+    """
+    The primary controller class that coordinates and manages all major classes and in the delivery system and
+    initializes the necessary data structures.
+
+    This contains the main logic of the program, including calculating every shortest path from each location to
+    every other location, determining each package's truck assignments based on various criteria, loading packages
+    into trucks, delivering each package to their destination before applicable deadlines, and performing numerous
+    other related tasks.
+    """
+
     def __init__(self, locations_file, packages_file):
+        """
+        Initializes a new instance of the LogisticsManager class.
+        :param locations_file: The path to the csv file containing location information for each address that is part of
+        the delivery topography and their relative direct distances in miles to each other.
+        :param packages_file: The path to the csv file containing package information, including any special notes.
+        """
         self._locations = None
         self._hub = None
         self._graph = None
@@ -29,6 +45,20 @@ class LogisticsManager:
         self._initialize(locations_file, packages_file)
 
     def _initialize(self, locations_file, packages_file):
+        """
+        An initialization function that performs most of the program's underlying logic.
+
+        Locations and Packages are instantiated using the data from the relevant csv files, and each Truck and Driver
+        are instantiated based on the number of trucks and drivers.  It calculates the shortest path between every
+        location utilizing Dijkstra's algorithm.  All packages are assigned to available trucks taking into account
+        each package's special conditions, such as deadlines and grouping requirements.  Packages are then loaded and
+        delivered to their respective destinations.
+        :param locations_file: The path to the csv file containing
+        location information for each address that is part of the delivery topography and their relative direct
+        distances in miles to each other.
+        :param packages_file: The path to the csv file containing package
+        information, including any special notes.
+        """
         self._locations = Locations(locations_file)
         self._hub = self._locations.get_location('HUB')
         self._graph = self._locations.get_graph()
@@ -56,22 +86,41 @@ class LogisticsManager:
 
     @staticmethod
     def calculate_time_from_miles(miles: float):
+        """
+        A static method which calculates and returns the time as a timedelta object from the number of miles.
+        :param miles: The miles used in the miles-to-timedelta calculation.
+        :return: The time as a timedelta object from the number of miles.
+        :raises ValueError: If miles value is not an integer or float.
+        """
+        if not isinstance(miles, (int, float)):
+            raise ValueError('Invalid "miles" value.')
         time_hours = miles / TRUCK_SPEED
         return timedelta(seconds=time_hours * 60 * 60)
 
     def _calculate_all_shortest_paths(self):
+        """
+        Initialization function which uses the Dijkstra implementation to calculate the shortest path for every pair
+        of locations.
+        """
         for location in self._locations.get_all_locations():
             shortest_path = Dijkstra(location, self._graph)
             self._all_shortest_paths[location] = shortest_path
 
     def _handle_special_cases(self):
+        """
+        Initialization function which modifies all Package objects which have special conditions, including:
+        (1) Must be on Truck #2;
+        (2) Is delayed on flight and will not arrive to the hub until 9:05 am;
+        (3) Is initially assigned the wrong destination address;
+        (4) Must be delivered alongside other specified packages.
+        :return: Special cases hash table.
+        """
+
         def handle_only_truck_2(pckg: Package):
             truck_2 = self._trucks.get_truck_by_id(2)
             truck_2.add_assigned_package(pckg)
 
         def handle_delayed_packages(pckg: Package):
-            # TODO: Cite: https://www.tutorialspoint.com/python/python_reg_expressions.htm
-            # TODO: Cite: https://www.programiz.com/python-programming/datetime/strptime
             pckg.set_status(Package.STATUSES[1], BEGINNING_OF_DAY)
             self._trucks.add_delayed_package(pckg)
             special_note = pckg.special_notes
@@ -136,6 +185,10 @@ class LogisticsManager:
         return self._special_cases
 
     def _group_packages_by_destination(self):
+        """
+        Initialization function which groups all packages by their destination in a hash table and accounts for the
+        location(s) with a wrong address by marking its destination as "UNKNOWN_DESTINATION".
+        """
         for package in self._packages.get_all_as_list():
             if not package.wrong_address:
                 if not self._packages_by_destination[package.destination]:
@@ -146,6 +199,15 @@ class LogisticsManager:
                 self._packages_by_destination['UNKNOWN_DESTINATION'] = package
 
     def _assign_packages_to_trucks(self):
+        """
+        Initialization function that assigns (but does not load) packages to available trucks depending on various
+        criteria such as package special conditions, truck capacity, deadline considerations, delayed packages, and
+        ensuring packages with the same destination are on the same truck where possible.
+        :raises RuntimeError: If there are no available trucks with capacity when searching for best available truck.
+        :raises RuntimeError: If there are no available trucks.
+        :raises RuntimeError: If a package's deadline would be missed based on current assignments.
+        """
+
         def get_current_capacity(truck):
             return truck.current_capacity - len(truck.assigned_packages)
 
@@ -185,7 +247,8 @@ class LogisticsManager:
         assign_to_truck_1 = True
         # Assign remaining packages with deadlines to truck 1 (earliest to leave) if possible, otherwise truck 2 if
         # possible, otherwise to the first truck without a driver that has capacity.
-        remaining_packages_with_deadline = [p for p in self._packages.get_all_as_list() if p.deadline and not p.assigned]
+        remaining_packages_with_deadline = [p for p in self._packages.get_all_as_list() if
+                                            p.deadline and not p.assigned]
         for package_with_deadline in remaining_packages_with_deadline:
             packages_with_same_destination = self._packages_by_destination[package_with_deadline.destination].value
             packages_to_add = []
@@ -223,6 +286,22 @@ class LogisticsManager:
                         assigned_packages[package_in_group] = truck
 
     def _load_packages_subset(self, subset, curr_truck, has_deadlines=False):
+        """
+        A function which takes a set of packages, either with our without deadlines, and loads them into the current
+        truck.
+
+        Separate logic exists for packages with deadlines versus without.  For the group of packages with deadlines
+        at a particular location, the whole group's effective deadline will be the package with the earliest deadline
+        in the group since they will all be delivered at the same time.
+
+        Any low-priority packages - that is, it has no special conditions and would amount to an arbitrary
+        "excessive distance" along its calculated route thus far - that are currently on trucks with drivers, are
+        re-assigned and loaded into the first truck without a driver (#3) holding the lowest-priority packages.
+        :param subset: The subset of packages (with or without deadlines) to be loaded.
+        :param curr_truck: The truck to load the current set of packages onto.
+        :param has_deadlines: A boolean which is True if the subset of packages has deadlines, otherwise False.
+        :raises RuntimeError: If the deadline would be missed for any package in the set of packages.
+        """
         locations_to_packages_table = self._packages.locations_to_packages_table
         excessive_distance = 5.0
         # Chain previous subset (if it exists) with current subset.
@@ -240,6 +319,7 @@ class LogisticsManager:
             # Add next closest location to truck's packages linked list if it wouldn't miss deadline.
             packages_at_next_closest_loc = [p for p in locations_to_packages_table[curr_loc].value
                                             if not p.wrong_address]
+            # Efficiency logic to re-assign low-priority packages to the first truck without a driver.
             truck_3: Truck = self._trucks.get_truck_by_id(3)
             if (
                     curr_truck != truck_3
@@ -281,6 +361,10 @@ class LogisticsManager:
             next_closest_loc, distance_to_next = next_shortest_paths.get_closest_from_group(subset)
 
     def load_packages(self):
+        """
+        A function that separates package destinations with deadlines from those without and, in that order, loads the
+        corresponding packages into their assigned trucks.
+        """
         trucks_with_drivers = [t for t in self._trucks.trucks if t.driver]
         for current_truck in trucks_with_drivers:
             current_truck.load_bundle(packages=None, distance_from_prev=0, curr_travel_distance=-1)
@@ -294,6 +378,14 @@ class LogisticsManager:
             self._load_packages_subset(subset_without_deadlines, current_truck, has_deadlines=False)
 
     def deliver_packages(self):
+        """
+        A function that delivers all packages and updates Package and Truck statuses at the applicable times.
+
+        The package(s) with the initially incorrect destination address has its destination updated at the appropriate
+        time.  Any trucks that do not start the day with a driver are loaded once a driver returns from completing
+        their route.
+        """
+
         def update_wrong_address_packages():
             packages_to_update = [p for p in self._packages.get_all_as_list() if p.wrong_address]
             for package in packages_to_update:
@@ -381,28 +473,16 @@ class LogisticsManager:
 
             complete_route(next_truck, curr_time, curr_location)
 
-        # def timedelta_to_time(td: timedelta):
-        #     total_seconds = td.total_seconds()
-        #     hours = total_seconds // 3600
-        #     minutes = (total_seconds % 3600) // 60
-        #     seconds = total_seconds % 60
-        #     return time(int(hours), int(minutes), int(seconds))
-        #
-        # def calculate_miles_from_time(time: timedelta):
-        #     return time.total_seconds() / 3600 * TRUCK_SPEED
-        #
-        # for truck in self._trucks.trucks:
-        #     print(truck)
-        #     for loc, t, m in truck.location_by_time_list:
-        #         print(f'{loc} | {timedelta_to_time(t)} | {m}')
-        #
-        # for package in self._packages.get_all():
-        #     print(f'Package #{package.id}  on Truck #{package.truck_id}')
-        #     for td, status in package.status_at_times:
-        #         print(f'{timedelta_to_time(td)} | {status}')
-
-    def get_packages(self):
+    def get_packages(self) -> Packages:
+        """
+        Returns the instantiated Packages object.
+        :return: The instantiated Packages object.
+        """
         return self._packages
 
-    def get_trucks(self):
+    def get_trucks(self) -> Trucks:
+        """
+        Returns the instantiated Trucks object.
+        :return: The instantiated Trucks object.
+        """
         return self._trucks

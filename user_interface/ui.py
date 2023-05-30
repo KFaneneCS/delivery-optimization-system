@@ -16,13 +16,15 @@ class UI:
         hours = total_seconds // 3600
         minutes = (total_seconds % 3600) // 60
         seconds = total_seconds % 60
-        return time(int(hours), int(minutes), int(seconds))
+        return time(int(hours), int(minutes), int(seconds)).strftime('%H:%M')
 
     @staticmethod
     def _get_user_time() -> timedelta:
         try:
             user_time = input('Enter (military) time in HH:MM format: ')
             hours, minutes = map(int, user_time.split(':'))
+            if not (0 <= hours <= 23) or not (0 <= minutes <= 59):
+                raise ValueError
             curr_time = timedelta(hours=hours, minutes=minutes)
             return curr_time
         except ValueError:
@@ -80,10 +82,9 @@ class UI:
             return
 
         curr_status = curr_package.get_status(curr_time)
-
+        print(f'\nPackage assigned to Truck #{curr_truck.id}')
+        print(f'At {self._timedelta_to_time(curr_time)}, package is {curr_status}')
         curr_package.display_info()
-        print(f'        Package assigned to Truck #{curr_truck.id}')
-        print(f'        At {self._timedelta_to_time(curr_time)}, package is {curr_status}')
 
     def show_all_statuses_at_time(self):
         packages_list = self._packages.get_all_as_list()
@@ -96,7 +97,7 @@ class UI:
         if not curr_time:
             return
 
-        print('\n')
+        print(f'\nAt {self._timedelta_to_time(curr_time)}:')
         for truck in self._trucks.trucks:
             location, mileage, in_transit = truck.get_curr_location_and_mileage(curr_time)
             print(f'Truck #{truck.id}:')
@@ -110,7 +111,7 @@ class UI:
             curr_status = package.get_status(curr_time)
 
             match curr_status:
-                case 'At Hub':
+                case 'At the Hub':
                     at_hub_list.append(package.id)
                 case 'Delayed':
                     delayed_list.append(package.id)
