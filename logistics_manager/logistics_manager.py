@@ -41,7 +41,6 @@ class LogisticsManager:
             num_drivers=2,
             start_location=self._hub,
             start_time=START_TIME,
-            curr_time=START_TIME,
         )
         self._early_departure_set = False
         self._special_cases = HashTable(10)
@@ -284,7 +283,7 @@ class LogisticsManager:
     def load_packages(self):
         trucks_with_drivers = [t for t in self._trucks.trucks if t.driver]
         for current_truck in trucks_with_drivers:
-            current_truck.load_bundle(packages=None, distance_to_next=0, curr_travel_distance=-1)
+            current_truck.load_bundle(packages=None, distance_from_prev=0, curr_travel_distance=-1)
 
             # Separate packages with deadlines from packages without.
             subset_with_deadlines = list(set(p.destination for p in current_truck.assigned_packages if p.deadline))
@@ -308,13 +307,13 @@ class LogisticsManager:
             return new_travel_distance
 
         def load_idle_truck(truck):
-            truck.load_bundle(packages=None, distance_to_next=0, curr_travel_distance=-1)
+            truck.load_bundle(packages=None, distance_from_prev=0, curr_travel_distance=-1)
             full_set = list(set(p.destination for p in truck.assigned_packages if not p.wrong_address))
             self._load_packages_subset(full_set, truck, has_deadlines=False)
 
             wrong_address_packages = list(set(p for p in truck.assigned_packages if p.wrong_address))
             for package in wrong_address_packages:
-                truck.load_bundle(packages=[package], distance_to_next=math.inf, curr_travel_distance=math.inf)
+                truck.load_bundle(packages=[package], distance_from_prev=math.inf, curr_travel_distance=math.inf)
 
         def complete_route(truck, time, location):
             while not truck.packages_queue.is_empty():

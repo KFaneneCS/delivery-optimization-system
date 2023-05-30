@@ -33,7 +33,7 @@ class Packages:
 
     def _add_all_packages(self):
         """
-        Initialization function that extracts data from the pacakges csv file and instantiates corresponding Package
+        Initialization function that extracts data from the packages csv file and instantiates corresponding Package
         objects, then adds those objects to the packages list.
         :raises IndexError:  If csv data has missing values, causing an index error during extraction.
         :raises ValueError:  If csv data has invalid data.
