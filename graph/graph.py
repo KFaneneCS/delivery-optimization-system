@@ -1,3 +1,5 @@
+from typing import List
+
 from data_structures.hash import HashTable
 from locations.location import Location
 
@@ -10,6 +12,7 @@ class Graph:
     and the graph itself.  It also provides a function that prints a simple representation of the graph and its
     connections to console.
     """
+
     def __init__(self):
         """
         Initializes a new instance of the Graph class.
@@ -20,7 +23,7 @@ class Graph:
     @property
     def size(self) -> int:
         """
-        Gets the size of the graph - that is, the number of vertices it contains.
+        Returns the size of the graph - that is, the number of vertices it contains.
         :return: The number of vertices in the graph.
         """
         return self._size
@@ -65,28 +68,57 @@ class Graph:
             raise ValueError(f'Vertex {vertex} not found in the graph.')
 
     def remove_edge(self, source: Location, target: Location):
+        """
+        Removes an existing edge between two vertices.
+        :param source: The source vertex of the weighted edge to be removed.
+        :param target: The target vertex of the weighted edge to be removed.
+        """
         curr_edge_list = self._graph[source]
         # Update edge list by removing edge that contains the passed source vertex.
         curr_edge_list.value = [(v, w) for v, w in curr_edge_list.value if v != target]
 
     def change_edge_weight(self, source: Location, target: Location, new_weight: float):
+        """
+        Alters an existing weighted edge between two nodes with a new weight value.
+        :param source: The source vertex of the weighted edge to be altered.
+        :param target: The target vertex of the weighted edge to be altered.
+        :param new_weight: The new weight value for the source and target vertices.
+        """
         curr_edge_list = self._graph[source]
         for i, (vertex, weight) in enumerate(curr_edge_list.value):
             if vertex == target:
                 curr_edge_list.value[i] = (vertex, new_weight)
 
     def get_graph(self):
+        """
+        Returns the graph itself as a Graph object.
+        :return: The graph as a Graph object.
+        """
         return self._graph
 
-    def get_all_vertices(self):
+    def get_all_vertices(self) -> List:
+        """
+        Returns a list containing all vertices.
+        :return: A list containing all vertices.
+        """
         return [vertex for vertex, edge_list in self._graph.items()]
 
-    def get_weighted_edges(self, loc_object):
-        vertex = self._graph[loc_object]
-        return vertex.value
+    def get_weighted_edges(self, source: Location):
+        """
+        Returns the weighted edge list for the passed source vertex.
+        :param source: The vertex of the weighted edge list being returned.
+        :return: The weighted edge list of the passed source vertex.
+        """
+        node = self._graph[source]
+        return node.value
 
     def show_all_connections(self):
-        for location, edge_list in self._graph.items():
-            print(f'Location: {location}')
+        """
+        Prints to console a simple representation of all vertices and edges in the graph.
+
+        Intended for testing purposes.
+        """
+        for vertex, edge_list in self._graph.items():
+            print(f'Location: {vertex}')
             for edge in edge_list:
                 print(f'  -> {edge[0].get_key()} | {edge[1]} miles')

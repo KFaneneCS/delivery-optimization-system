@@ -1,4 +1,7 @@
 class Driver:
+    """
+    A simple class representing a truck driver.
+    """
     def __init__(self, id_: int):
         self._id = id_
 

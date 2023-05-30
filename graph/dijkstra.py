@@ -9,10 +9,26 @@ from .graph import Graph
 
 class Dijkstra:
     """
+    A class that implements Dijkstra's algorithm for finding the shortest path between two nodes.
 
+    This implementation first takes a start vertex form which we will find all the shortest path to every other vertex.
+    The direct weights/distances to every other node are predetermined and queued according to their distance, with
+    the shortest distance being first in the queue.  As we visit each node in the queue, we determine whether any
+    indirect paths exist that are shorter.  If so, our distance table, which tracks all paths for the start vertex, is
+    updated accordingly.
     """
 
     def __init__(self, start: Location, graph: Graph):
+        """
+        Initializes a new instance of the Dijkstra class.
+
+        Stores the shortest distance and shortest paths to every other node from the start node.  Three initializer
+        functions are called to get the predetermined direct paths and then to ultimately execute the algorithm to find
+        all the shortest paths and distances to every other node in the graph.
+        :param start: The primary node from which the algorithm finds all shortest paths.
+        :param graph: The graph that contains all applicable nodes, including the start node and every possible target
+        node.
+        """
         self._start = start
         self.graph = graph
         self.start_edges = self.graph.get_weighted_edges(self.start)
@@ -27,6 +43,11 @@ class Dijkstra:
         self._find_all_shortest_paths()
 
     def _initialize(self):
+        """
+        A function which initializes the weight to each vertex from the starting vertex with their associated values
+        predetermined direct path values.
+        :raises ValueError:  If the starting node is not found.
+        """
         if self.start not in self.graph.get_all_vertices():
             raise ValueError('Starting location node not found.')
         start_weight, prev_vertex = 0, None
@@ -39,13 +60,35 @@ class Dijkstra:
 
     @property
     def start(self) -> Location:
+        """
+        Returns the starting location node.
+        :return: The starting location node.
+        """
         return self._start
 
     @property
     def distance_table(self):
+        """
+        Returns the distance table containing the shortest distance to every vertex in the graph.
+        :return: The distance table containing the shortest distance to every vertex in the graph.
+        """
         return self._distance_table
 
     def _execute(self):
+        """
+        Contains the primary logic of Dijkstra's algorithm.
+
+        This implementation iterates through each node in the graph starting from the node with the closest direct
+        distance from the starting node.  The distance table and priority queue are as we visit each node, along the
+        way finding the shortest paths and distances to every other node in the graph.
+
+        While all target nodes are typically assigned with "infinity" values at the start using Dijkstra's algorithm,
+        the initial data this program is provided has all direct distance values from each location to every  other
+        location, forming a weighted, undirected complete graph.  We therefore initialize each target node with these
+        weights instead of infinity.  This improves the algorithm's efficiency since there are typically several cases
+        where the direct path is in fact the shortest path.
+        :return:
+        """
         while self.unvisited:
             curr_node = self.priority_queue.get()
             min_dist_to_curr = self.get_dist_and_prev(curr_node)[0]
@@ -66,15 +109,26 @@ class Dijkstra:
             self.visited.add(curr_node)
 
     def _find_all_shortest_paths(self):
+        """
+        Finds the shortest path to every other node in the graph.
+        """
         for target_location, _ in self._distance_table.items():
             self.get_shortest_path(target_location)
 
-    def get_shortest_path(self, target_location):
-        if self.all_paths.has_node(target_location):
-            return self.all_paths[target_location].value
+    def get_shortest_path(self, target):
+        """
+        This implementation first checks if the shortest path has already been found previously; if not, it traces
+        its path backwards starting from the target node using the distance table and stores it in the 'all_paths' hash
+        table to avoid duplicative calculations.
+        :param target: The target node to which the shortest path will be found from the starting node.
+        :return: The path from the start node to the target node, the final element of which will be a tuple containing
+        both the target node itself and the total weight/traversed distance.
+        """
+        if self.all_paths.has_node(target):
+            return self.all_paths[target].value
 
         path = []
-        target_node = self._distance_table[target_location]
+        target_node = self._distance_table[target]
         shortest_dist = target_node.value[0]
         path.append((target_node.key, shortest_dist))
         prev_loc = target_node.value[1]
@@ -85,25 +139,29 @@ class Dijkstra:
             prev_loc = prev_node.value[1]
 
         path.reverse()
-        self.all_paths[target_location] = path
+        self.all_paths[target] = path
         return path
 
     def get_dist_and_prev(self, target):
+        """
+        Returns the shortest known weight/distance from start node to target node as well as the node last visited
+        before the target node.  If the shortest path was a direct path from start to target, then the start node would
+        be the node last visited before the target node.
+        :param target: The target node in the graph.
+        :return: The edge weight and last node in the path to the target node as a tuple.
+        """
         node = self._distance_table[target]
         weight = node.value[0]
         prev = node.value[1]
         return weight, prev
 
-    def get_closest_from_start(self, visited: set):
-        min_distance = math.inf
-        curr_closest = None
-        for target, (distance, _) in self._distance_table.items():
-            if target not in visited and distance < min_distance and distance != 0:
-                min_distance = distance
-                curr_closest = target
-        return curr_closest, min_distance
-
     def get_closest_from_group(self, group: List[Location]):
+        """
+        Finds a node that is closest to the starting node among those included in the provided "group" list.
+        :param group: The group of Location nodes to be searched against.
+        :return: A tuple containing the closest node from the start among all nodes in the "group" list and its
+        corresponding distance.
+        """
         min_distance = math.inf
         curr_closest = None
         for location in group:
@@ -112,11 +170,3 @@ class Dijkstra:
                 min_distance = distance
                 curr_closest = location
         return curr_closest, min_distance
-
-    def get_max_distance(self):
-        max_distance = 0.0
-        for location, dist_to_neighbor in self._distance_table.items():
-            curr_distance = dist_to_neighbor[0]
-            if curr_distance > max_distance:
-                max_distance = curr_distance
-        return max_distance

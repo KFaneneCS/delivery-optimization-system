@@ -2,6 +2,7 @@ class _HashNode:
     """
     Represents nodes used in hash table.
     """
+
     def __init__(self, key, value):
         """
         Initializes a new instance of the _HashNode class.
@@ -75,6 +76,7 @@ class HashTable:
     This implementation includes a rehash() function that will resize the table to better distribute nodes once its
     load factor is exceeded. Standard methods for getting nodes, setting nodes, changing nodes, etc. are provided.
     """
+
     def __init__(self, table_size: int = 37, load_factor: float = 0.75):
         """
         Initializes a new instance of the HashNode class.

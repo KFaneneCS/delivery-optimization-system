@@ -1,6 +1,6 @@
 class _QueueNode:
     """
-    Represents nodes used in the priority queue.
+    A class representing nodes used in the priority queue.
     """
 
     def __init__(self, priority, information, is_max: bool = False):
