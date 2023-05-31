@@ -1,3 +1,4 @@
+import copy
 from datetime import timedelta
 
 from locations.location import Location
@@ -33,7 +34,8 @@ class Package:
         self._special_notes = notes
         self._assigned = False
         self._truck_id = None
-        self._wrong_address = False
+        self._has_wrong_address = False
+        self._old_package_copy = None
         self._not_special = False
         self._priority = None
         self._status = None
@@ -50,7 +52,7 @@ class Package:
                f'truck={self._truck_id}) '
 
     @property
-    def id(self):
+    def id(self) -> int:
         """
         Returns the ID associated with the Package.
         :return: The ID associated with the Package.
@@ -58,7 +60,7 @@ class Package:
         return self._id
 
     @property
-    def destination(self):
+    def destination(self) -> Location:
         """
         Returns the destination associated with the Package.
         :return: The destination associated with the Package.
@@ -77,7 +79,23 @@ class Package:
         self._destination = new_destination
 
     @property
-    def deadline(self):
+    def city(self) -> str:
+        """
+        Returns the package's destination's city.
+        :return: The package's destination's city.
+        """
+        return self._city
+
+    @property
+    def zip_code(self) -> str:
+        """
+        Returns the package's destination's zip code.
+        :return: The package's destination's zip code.
+        """
+        return self._zip_code
+
+    @property
+    def deadline(self) -> timedelta:
         """
         Returns the delivery deadline associated with the Package.
         :return: The delivery deadline associated with the Package.
@@ -85,7 +103,15 @@ class Package:
         return self._deadline
 
     @property
-    def special_notes(self):
+    def kilos(self) -> int:
+        """
+        Returns the package's mass in kilograms.
+        :return: The package's mass in kilograms.
+        """
+        return self._kilos
+
+    @property
+    def special_notes(self) -> str:
         """
         Returns special notes associated with the package.
         :return: Special notes associated with the package.
@@ -93,7 +119,7 @@ class Package:
         return self._special_notes
 
     @property
-    def assigned(self):
+    def assigned(self) -> bool:
         """
         Returns True if Package has been assigned to a truck, otherwise False.
         :return: True if Package has been assigned to a truck, otherwise False.
@@ -112,7 +138,7 @@ class Package:
         self._assigned = is_assigned
 
     @property
-    def priority(self):
+    def priority(self) -> (int, float):
         """
         Returns the priority value of the Package.
         :return: The priority value of the Package.
@@ -131,7 +157,7 @@ class Package:
         self._priority = priority_value
 
     @property
-    def truck_id(self):
+    def truck_id(self) -> int:
         """
         Returns the truck ID associated with the Package.
         :return: The truck ID associated with the Package.
@@ -150,26 +176,36 @@ class Package:
         self._truck_id = truck_id
 
     @property
-    def wrong_address(self):
+    def has_wrong_address(self) -> bool:
         """
         Returns True if Package starts with a wrong destination address, otherwise False.
         :return: True if Package starts with a wrong destination address, otherwise False.
         """
-        return self._wrong_address
+        return self._has_wrong_address
 
-    @wrong_address.setter
-    def wrong_address(self, has_wrong_address: bool):
+    @has_wrong_address.setter
+    def has_wrong_address(self, has_wrong_address: bool):
         """
-        Sets the Package's "wrong_address" boolean attribute.
+        Sets the Package's "wrong_address" boolean attribute, then stores the original package info to access incorrect
+        destination information after that information has been updated.
         :param has_wrong_address: Boolean value indicating if Package has wrong destination address at the start.
         :raises ValueError: If value passed is not a boolean.
         """
         if not isinstance(has_wrong_address, bool):
             raise ValueError('Invalid "has wrong address" value.')
-        self._wrong_address = has_wrong_address
+        self._has_wrong_address = has_wrong_address
+        self._old_package_copy = copy.deepcopy(self)
 
     @property
-    def not_special(self):
+    def old_package_copy(self):
+        """
+        Returns the original Package object before destination information is updated.
+        :return: The original Package object before destination information is updated.
+        """
+        return self._old_package_copy
+
+    @property
+    def not_special(self) -> bool:
         """
         Returns True if Package has no special conditions, otherwise False.
         :return: True if Package has no special conditions, otherwise False.
@@ -236,15 +272,17 @@ class Package:
         """
         for td, status in reversed(self._status_at_times):
             if curr_time >= td:
+                if status == 'Delayed':
+                    return 'At the Hub (Delayed)'
                 return status
         return None
 
-    def display_info(self):
+    def get_time_of_delivery(self):
         """
-        Prints specific package information to console.  Intended for the user as part of the UI experience.
+        Returns the time at which the Package was delivered.
+        :return: The time at which the Package was delivered, or None if its delivery was not tracked.
         """
-        print(f'\tID={self._id}\n'
-              f'\tDelivery Address={self.destination.address}\n'
-              f'\tDelivery City={self._city} | Delivery Zip Code={self._zip_code}\n'
-              f'\tDelivery Deadline={self._deadline}\n'
-              f'\tPackage Weight={self._kilos} kilos')
+        for time, status in self._status_at_times:
+            if status == 'Delivered':
+                return time
+        return None

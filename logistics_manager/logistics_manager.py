@@ -65,12 +65,16 @@ class LogisticsManager:
         self._all_shortest_paths = HashTable()
         self._calculate_all_shortest_paths()
         self._hub_shortest_paths = self._all_shortest_paths[self._hub].value
-        self._packages = Packages(package_csv=packages_file, locations=self._locations)
+        self._packages = Packages(
+            package_csv=packages_file,
+            locations=self._locations,
+            time_address_corrected=CORRECTED_ADDRESS_TIME
+        )
         self._trucks = Trucks(
             num_trucks=3,
             num_drivers=2,
             start_location=self._hub,
-            start_time=START_TIME,
+            start_time=START_TIME
         )
         self._early_departure_set = False
         self._special_cases = HashTable(10)
@@ -141,7 +145,7 @@ class LogisticsManager:
             self._delayed_packages.append(pckg)
 
         def handle_wrong_address(pckg: Package):
-            pckg.wrong_address = True
+            pckg.has_wrong_address = True
             trucks_without_drivers = [t for t in self._trucks.trucks if not t.driver]
             # Assign package to first truck without driver since address will not be known for some time.
             trucks_without_drivers[0].add_assigned_package(pckg)
@@ -190,7 +194,7 @@ class LogisticsManager:
         location(s) with a wrong address by marking its destination as "UNKNOWN_DESTINATION".
         """
         for package in self._packages.get_all_as_list():
-            if not package.wrong_address:
+            if not package.has_wrong_address:
                 if not self._packages_by_destination[package.destination]:
                     self._packages_by_destination[package.destination] = [package]
                 else:
@@ -318,7 +322,7 @@ class LogisticsManager:
             curr_loc = next_closest_loc
             # Add next closest location to truck's packages linked list if it wouldn't miss deadline.
             packages_at_next_closest_loc = [p for p in locations_to_packages_table[curr_loc].value
-                                            if not p.wrong_address]
+                                            if not p.has_wrong_address]
             # Efficiency logic to re-assign low-priority packages to the first truck without a driver.
             truck_3: Truck = self._trucks.get_truck_by_id(3)
             if (
@@ -387,10 +391,11 @@ class LogisticsManager:
         """
 
         def update_wrong_address_packages():
-            packages_to_update = [p for p in self._packages.get_all_as_list() if p.wrong_address]
+            packages_to_update = [p for p in self._packages.get_all_as_list() if p.has_wrong_address]
             for package in packages_to_update:
                 package.destination = self._locations.get_location(CORRECTED_ADDRESS)
-                package.wrong_address = False
+                # FIXME
+                # package.wrong_address = False
 
         def update_travel_distance(prev_location, curr_location):
             prev_paths = self._all_shortest_paths[prev_location].value
@@ -400,10 +405,10 @@ class LogisticsManager:
 
         def load_idle_truck(truck):
             truck.load_bundle(packages=None, distance_from_prev=0, curr_travel_distance=-1)
-            full_set = list(set(p.destination for p in truck.assigned_packages if not p.wrong_address))
+            full_set = list(set(p.destination for p in truck.assigned_packages if not p.has_wrong_address))
             self._load_packages_subset(full_set, truck, has_deadlines=False)
 
-            wrong_address_packages = list(set(p for p in truck.assigned_packages if p.wrong_address))
+            wrong_address_packages = list(set(p for p in truck.assigned_packages if p.has_wrong_address))
             for package in wrong_address_packages:
                 truck.load_bundle(packages=[package], distance_from_prev=math.inf, curr_travel_distance=math.inf)
 

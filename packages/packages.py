@@ -13,7 +13,7 @@ class Packages:
     Package objects.
     """
 
-    def __init__(self, package_csv: str, locations: Locations):
+    def __init__(self, package_csv: str, locations: Locations, time_address_corrected: timedelta):
         """
         Initializes a new instance of the Packages class.
 
@@ -22,10 +22,11 @@ class Packages:
         :param package_csv: The csv file from which data for all packages is found.
         :param locations: A Locations object from which all Location objects can be accessed.
         """
+        self._locations = locations
+        self._time_address_corrected = time_address_corrected
         self._packages = HashTable(80)
         self._packages_list = []
         self._loader = PackagesLoader(package_csv)
-        self._locations = locations
         self._priority_queue = None
         self._location_to_packages_table = HashTable()
         self._add_all_packages()
@@ -123,3 +124,25 @@ class Packages:
         """
         for package in self._packages:
             yield package, package.status_at_times
+
+    def display_package_info(self, package, curr_time):
+        """
+        Prints specific package information to console.  Intended for the user as part of the UI experience.  If the
+        package started with a wrong delivery address, and the current time is less than the time the address is
+        corrected, then the original wrong destination information is displayed - otherwise, its updated information is
+        displayed.
+        :param package: The Package object whose information is being displayed.
+        :param curr_time: The current time to compare against the time the wrong address is corrected.
+        :raises ValueError: If package is not Package object or curr_time is not timedelta object.
+        """
+        if not isinstance(package, Package):
+            raise ValueError('Invalid "package" value.')
+        if not isinstance(curr_time, timedelta):
+            raise ValueError('Invalid "current time" value.')
+
+        if package.has_wrong_address and curr_time < self._time_address_corrected:
+            package = package.old_package_copy
+
+        print(f'ID={package.id} | Delivery Address={package.destination.address} | Delivery City={package.city} | '
+              f'Delivery Zip Code={package.destination.zip_code} | Delivery Deadline={package.deadline} | '
+              f'Package Weight={package.kilos}')

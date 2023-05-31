@@ -32,10 +32,11 @@ class UI:
 
     def display_trucks_info(self):
         for truck in self._trucks.trucks:
-            print(f'\nTruck #{truck.id} total mileage = {round(truck.miles_traveled, ndigits=1)}')
-            print('    Route: ', end='  ')
-            for location, _, _ in truck.location_by_time_list:
-                print(f'-> {location.address}', end=' ')
+            print(f'Truck #{truck.id} total mileage = {round(truck.miles_traveled, ndigits=1)}')
+            associated_package_ids = sorted([p.id for p in truck.delivered_packages])
+            print(f'\tAssociated packages = {associated_package_ids}')
+        total_mileage = self._trucks.get_total_mileage()
+        print(f'\nTOTAL mileage for all trucks = {total_mileage}')
         print('\n----------------------------------------------------------')
 
     def execute(self):
@@ -83,13 +84,17 @@ class UI:
 
         curr_status = curr_package.get_status(curr_time)
         print(f'\nPackage assigned to Truck #{curr_truck.id}')
-        print(f'At {self._timedelta_to_time(curr_time)}, package is {curr_status}')
-        curr_package.display_info()
+        if curr_status == 'Delivered':
+            delivery_time = curr_package.get_time_of_delivery()
+            print(f'At {self._timedelta_to_time(curr_time)}, package has been delivered.  '
+                  f'Package was delivered at {delivery_time}')
+        else:
+            print(f'At {self._timedelta_to_time(curr_time)}, package is {curr_status}')
+        self._packages.display_package_info(curr_package, curr_time)
 
     def show_all_statuses_at_time(self):
         packages_list = self._packages.get_all_as_list()
         at_hub_list = []
-        delayed_list = []
         en_route_list = []
         delivered_list = []
 
@@ -105,22 +110,27 @@ class UI:
                 print(f'    Current Location:  {location}')
             else:
                 print(f'    In transit after leaving:  {location}')
-            print(f'    Current Mileage:  {round(mileage, ndigits=1)}')
 
         for package in packages_list:
             curr_status = package.get_status(curr_time)
 
-            match curr_status:
-                case 'At the Hub':
-                    at_hub_list.append(package.id)
-                case 'Delayed':
-                    delayed_list.append(package.id)
-                case 'En Route':
-                    en_route_list.append(package.id)
-                case 'Delivered':
-                    delivered_list.append(package.id)
+            if curr_status in ['At the Hub', 'At the Hub (Delayed)']:
+                at_hub_list.append(package)
+            elif curr_status == 'En Route':
+                en_route_list.append(package)
+            elif curr_status == 'Delivered':
+                delivered_list.append(package)
+            else:
+                raise RuntimeError(f'Issue finding status for Package #{package.id}')
 
-        print(f'\nPackages at the HUB:  {at_hub_list if at_hub_list else None}')
-        print(f'Packages delayed on plane:  {delayed_list if delayed_list else None}')
-        print(f'Packages loaded and en route:  {en_route_list if en_route_list else None}')
-        print(f'Packages delivered:  {delivered_list if delivered_list else None}')
+        print(f'\nPackages At the HUB at {curr_time}:')
+        for package_at_hub in at_hub_list:
+            self._packages.display_package_info(package_at_hub, curr_time)
+        print(f'\nPackages En Route at {curr_time}:')
+        for package_en_route in en_route_list:
+            self._packages.display_package_info(package_en_route, curr_time)
+        print(f'\nPackages Delivered by {curr_time}:')
+        for package_delivered in delivered_list:
+            delivery_time = package_delivered.get_time_of_delivery()
+            self._packages.display_package_info(package_delivered, curr_time)
+            print(f'\tPackage was delivered at {delivery_time}')

@@ -113,3 +113,10 @@ class Trucks:
             if truck.id == truck_id:
                 return truck
         return None
+
+    def get_total_mileage(self):
+        """
+        Returns the rounded total miles traveled for all trucks.
+        :return: The rounded total miles traveled for all trucks.
+        """
+        return round(sum([truck.miles_traveled for truck in self._trucks]), ndigits=2)
