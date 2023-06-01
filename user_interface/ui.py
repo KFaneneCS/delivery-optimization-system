@@ -64,6 +64,7 @@ class UI:
             packages_table = self._packages.get_all_as_table()
             user_package_id = input('Enter package ID: ')
             package_id = int(user_package_id)
+
             if not packages_table[package_id]:
                 print('Please enter valid Package ID.')
                 return

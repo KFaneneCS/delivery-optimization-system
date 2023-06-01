@@ -74,13 +74,12 @@ class PriorityQueue:
         Changes the priority value of an existing node in the queue.
         :param priority: The new priority value of an existing node.
         :param information: The current information associated with the existing node. Used to find the node in queue.
-        :return:
+        :return: None if node is not found.
         """
         for i, node in enumerate(self._queue):
             if node.information == information:
                 node.priority = priority
                 self.heapify(i, len(self._queue))
-                return self
         return None
 
     def heapify(self, i, n):
@@ -88,11 +87,23 @@ class PriorityQueue:
         Method which contains the heap logic to maintain the tree's heap property.
 
         Compares the left and right child of the node at index i and performs a swap if the current node's priority
-        value is less than either child.  This is performed recursively until the all nodes are in their proper place.
+        value is less than either child.  This is performed recursively until all nodes are in their proper place.
         This method is called to restore the heap property after changes are made, such as removing nodes.
-        :param i:
-        :param n:
-        :return:
+
+        Time Complexity: O(log(n)).
+
+        This method is performed recursively until all nodes are in their proper place.  The worst case is that we
+        would have to traverse the size of the tree, and as this is a complete binary search tree, the time complexity
+        is therefore O(log(n)).
+
+        Space Complexity:  O(log(n)).
+
+        Each call to "heapify()" contributes a constant amount of marginal space = O(1).  Since the number of recursive
+        calls is, at worst, proportional to the size of the binary search tree, the space complexity is therefore
+        O(log(n)).
+
+        :param i: The index of the node to begin the heapify on.
+        :param n: The number of elements in the heap.
         """
         smallest = i
         left = (2 * i) + 1

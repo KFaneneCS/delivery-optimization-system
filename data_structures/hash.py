@@ -110,6 +110,23 @@ class HashTable:
         Hashes the provided key, then finds and returns the corresponding node.
 
         Implements the move-to-front strategy for increased efficiency.
+
+        Time Complexity: O(m + n)
+
+        Generating the hashed key depends on the length of the unhashed key string and is independent of the number
+        of nodes = O(m).  The "while" loop will iterate through each node at a given index determined by the
+        hashed key.  This hash implementation attempts to maintain proper distribution of nodes, but the worst-case
+        is ultimately the total number of nodes since all nodes could have the same hashed key value = O(n). This
+        implementation uses a "move-to-front" algorithm to improve efficiency by bringing the most recently returned
+        node to the first position of that index.  This only contributes O(1) time complexity since pointers need
+        simply to be reassigned.
+
+        Space Complexity:  O(1)
+
+        The space complexity is simply O(1) as no component of the implementation contributes greater than O(1).  For
+        example, the "hashed_key" is simply a single integer value; "curr_node" and "prev_node" are nodes accessed
+        via the hash table, etc.
+
         :param unhashed_key: Key associated with node before hashing.
         :return: The corresponding node if it exists, otherwise None.
         """
@@ -132,9 +149,26 @@ class HashTable:
     def _add_node(self, unhashed_key, value):
         """
         Adds a node to the hash table after hashing the provided key.
+
+        Time Complexity: O(m + n)
+
+        Generating the hashed key depends on the length of the unhashed key string and is independent of the number
+        of nodes = O(m). In the "else - while" loop, when this implementation attempts to find the insertion point
+        for the new node, the worse-case is that it will iterate through every node, though this is highly unlikely
+        due to the nature of the hash table's self-adjusting size and the unlikelihood of such a distribution = O(n).
+        If the load factor is exceeded, then the "rehash()" method would be called to increase the table size and
+        redistribute the nodes = O(n).
+        O(m + 2n) = O(m + n)
+
+        Space Complexity:  O(m).
+
+        The "hashed_key", "curr_node", and "new_node" each contribute only O(1) to space complexity. If the "rehash()"
+        method is called due to meeting the load factor, then a new list is created double its original size = O(m).
+        Note that it doubles the size of the list, NOT the number of nodes - hence the variable "m". As no other
+        component of this method is worse than O(1), the space complexity is O(m).
+
         :param unhashed_key: Key to be associated with node prior to hashing.
         :param value: Value to be associated with node.
-        :return:
         """
         hashed_key = self._generate_hash(unhashed_key)
         curr_node = self._table[hashed_key]
@@ -151,7 +185,7 @@ class HashTable:
         if self._num_nodes / self._table_size >= self._load_factor:
             self.rehash()
 
-    def _generate_hash(self, unhashed_key):
+    def _generate_hash(self, unhashed_key) -> int:
         """
         The primary logic of the hash data structure.
 
@@ -186,6 +220,19 @@ class HashTable:
         """
         A self-adjusting function that resizes the table and redistributes the nodes after the load factor is met or
         exceeded.
+
+        Time Complexity: O(n)
+
+        The time complexity for creating a new list is the size of the table = O(n).  The "for" loop's worst-case is
+        that it iterates through every node, or O(n), but this is unlikely on average since nodes are likely to be
+        better distributed.
+        O(n + n) = O(n)
+
+        Space Complexity:  O(m)
+
+        A new list is created that is double its original size, which we will call "m" since the
+        number of *nodes* is not impacted = O(m).  As no other component of this method has is worse than O(1), the
+        space complexity is O(m).
         """
         temp_table = self._table
 

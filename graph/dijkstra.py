@@ -87,7 +87,30 @@ class Dijkstra:
         location, forming a weighted, undirected complete graph.  We therefore initialize each target node with these
         weights instead of infinity.  This improves the algorithm's efficiency since there are typically several cases
         where the direct path is in fact the shortest path.
-        :return:
+
+        **Complexity**:
+
+        Time Complexity: O(n * log(n))
+
+        Each node is fetched from the queue.  Since the queue's get() method includes heapify, this = O(log(n)).  The
+        min. distance to current node is searched via hash function = O(1).  Then access each neighbor node = O(n-1).
+        Next "if" statement will only check neighbor nodes that have not been visited = O(log(n-1)).  Finding the
+        distance from current node to neighbor node and known distance from start to neighbor node are each via hash
+        function = O(1). The distance through the current node in the next "if" statement would happen every time
+        worst-case, therefore complexity = O(log( n-1)).  Changing a node in the hash table is simply accessing and
+        altering the current value = O(1). Changing the priority of a node in the queue would = O(n * log(n)) since
+        the "change_priority" method iterates through each node until the correct one is found, then performs a
+        "heapify" on the queue.
+        O(n * (log(n) + 1 + (n-1) + log(n-1) + 1 + 1) + n * log(n)) = O(n * log(n))
+
+        Space Complexity:  O(1)
+
+        "curr_node", "min_dist_to_curr", "neighbor_node", similar variables each have a space complexity = O(1). The
+        weighted edges list returns a reference to a list stored in a hash, so does not add to the space complexity.
+        Each time a node is removed form the "unvisited" list, it is also added to the "visited" list, and both lists
+        were created outside this method, thereby contributing net 0 to space usage.  The total space complexity
+        is therefore O(1) since no additional space is used beyond the variables holding single values.
+
         """
         while self.unvisited:
             curr_node = self.priority_queue.get()
@@ -97,10 +120,10 @@ class Dijkstra:
                 neighbor_node = edge_to_neighbor[0]
 
                 if neighbor_node not in self.visited:
-                    dist_neighbor_to_curr = edge_to_neighbor[1]
-                    dist_start_to_curr = self.get_dist_and_prev(neighbor_node)[0]
-                    if min_dist_to_curr + dist_neighbor_to_curr < dist_start_to_curr:
-                        new_min_dist = round(min_dist_to_curr + dist_neighbor_to_curr, ndigits=3)
+                    dist_curr_to_neighbor = edge_to_neighbor[1]
+                    dist_start_to_neighbor = self.get_dist_and_prev(neighbor_node)[0]
+                    if min_dist_to_curr + dist_curr_to_neighbor < dist_start_to_neighbor:
+                        new_min_dist = round(min_dist_to_curr + dist_curr_to_neighbor, ndigits=3)
                         self._distance_table.change_node(unhashed_key=neighbor_node,
                                                          new_value=(new_min_dist, curr_node))
                         self.priority_queue.change_priority(priority=new_min_dist, information=neighbor_node)
@@ -120,6 +143,27 @@ class Dijkstra:
         This implementation first checks if the shortest path has already been found previously; if not, it traces
         its path backwards starting from the target node using the distance table and stores it in the 'all_paths' hash
         table to avoid duplicative calculations.
+
+        Time Complexity: O(n)
+
+        We will assume the path to target node does not already exist, in which case it would simply be returned from
+        the hash table at O(1) time complexity.
+        Finding target node is accessing the distance hash table = O(1), and the "shortest_dist" simply returns the
+        node's 1st tuple value = O(1).  Python's list's "append" method simply appends to the end of the list, which
+        is O(1) time complexity.  Finding "prev_loc" is the same node's 2nd tuple value = O(1).
+        Though the while loop in practice only loops a few times, it could hypothetically iterate through every other
+        node if the shortest path required going through every other node, so complexity = O(n). The path is reverse,
+        and Python's reverse() method slices and iterates through the list at a time complexity of O(n/2), or O(n).
+        O(n + n) = O(n)
+
+        Space Complexity:  O(m + n)
+
+        A new "path" list is created which would hold no more than the total number of Locations = O(n). Adding the
+        path to the "all_paths" hash table uses space equal to the length of the unhashed key string, which we will
+        call 'm' since its storage usage is independent of the number of nodes.
+        O(n) + O(m) = O(m + n)
+
+
         :param target: The target node to which the shortest path will be found from the starting node.
         :return: The path from the start node to the target node, the final element of which will be a tuple containing
         both the target node itself and the total weight/traversed distance.

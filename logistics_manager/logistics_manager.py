@@ -105,6 +105,16 @@ class LogisticsManager:
         """
         Initialization function which uses the Dijkstra implementation to calculate the shortest path for every pair
         of locations.
+
+        # TODO: Complexity analysis
+        Time Complexity: TBD
+
+        (explanation)
+
+        Space Complexity:  O(1)
+
+        (explanation)
+
         """
         for location in self._locations.get_all_locations():
             shortest_path = Dijkstra(location, self._graph)
@@ -207,6 +217,16 @@ class LogisticsManager:
         Initialization function that assigns (but does not load) packages to available trucks depending on various
         criteria such as package special conditions, truck capacity, deadline considerations, delayed packages, and
         ensuring packages with the same destination are on the same truck where possible.
+
+        # TODO: Complexity analysis
+        Time Complexity: TBD
+
+        (explanation)
+
+        Space Complexity:  O(1)
+
+        (explanation)
+
         :raises RuntimeError: If there are no available trucks with capacity when searching for best available truck.
         :raises RuntimeError: If there are no available trucks.
         :raises RuntimeError: If a package's deadline would be missed based on current assignments.
@@ -368,6 +388,16 @@ class LogisticsManager:
         """
         A function that separates package destinations with deadlines from those without and, in that order, loads the
         corresponding packages into their assigned trucks.
+
+        # TODO: Complexity analysis
+        Time Complexity: TBD
+
+        (explanation)
+
+        Space Complexity:  O(1)
+
+        (explanation)
+
         """
         trucks_with_drivers = [t for t in self._trucks.trucks if t.driver]
         for current_truck in trucks_with_drivers:
@@ -388,6 +418,16 @@ class LogisticsManager:
         The package(s) with the initially incorrect destination address has its destination updated at the appropriate
         time.  Any trucks that do not start the day with a driver are loaded once a driver returns from completing
         their route.
+
+        # TODO: Complexity analysis
+        Time Complexity: TBD
+
+        (explanation)
+
+        Space Complexity:  O(1)
+
+        (explanation)
+
         """
 
         def update_wrong_address_packages():
