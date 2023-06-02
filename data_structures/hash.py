@@ -111,6 +111,8 @@ class HashTable:
 
         Implements the move-to-front strategy for increased efficiency.
 
+         **Complexity**:
+
         Time Complexity: O(m + n)
 
         Generating the hashed key depends on the length of the unhashed key string and is independent of the number
@@ -150,6 +152,8 @@ class HashTable:
         """
         Adds a node to the hash table after hashing the provided key.
 
+         **Complexity**:
+
         Time Complexity: O(m + n)
 
         Generating the hashed key depends on the length of the unhashed key string and is independent of the number
@@ -160,12 +164,12 @@ class HashTable:
         redistribute the nodes = O(n).
         O(m + 2n) = O(m + n)
 
-        Space Complexity:  O(m).
+        Space Complexity:  O(m + n).
 
-        The "hashed_key", "curr_node", and "new_node" each contribute only O(1) to space complexity. If the "rehash()"
-        method is called due to meeting the load factor, then a new list is created double its original size = O(m).
-        Note that it doubles the size of the list, NOT the number of nodes - hence the variable "m". As no other
-        component of this method is worse than O(1), the space complexity is O(m).
+        The "hashed_key" and "curr_node" contribute only O(1) to space complexity. However, a new node is created
+        each time "_add_node" is called, which contributes O(n) to space complexity. If the "rehash()" method is
+        called due to meeting the load factor, then a new list is created double its original size = O(m). Note that
+        it doubles the size of the list, NOT the number of nodes - hence the variable "m".
 
         :param unhashed_key: Key to be associated with node prior to hashing.
         :param value: Value to be associated with node.
@@ -221,6 +225,8 @@ class HashTable:
         A self-adjusting function that resizes the table and redistributes the nodes after the load factor is met or
         exceeded.
 
+         **Complexity**:
+
         Time Complexity: O(n)
 
         The time complexity for creating a new list is the size of the table = O(n).  The "for" loop's worst-case is
@@ -232,7 +238,8 @@ class HashTable:
 
         A new list is created that is double its original size, which we will call "m" since the
         number of *nodes* is not impacted = O(m).  As no other component of this method has is worse than O(1), the
-        space complexity is O(m).
+        space complexity is O(m).  Note that while new nodes are created here, they are simply replacing the original
+        nodes which are handled via garbage collection.
         """
         temp_table = self._table
 

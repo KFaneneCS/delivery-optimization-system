@@ -144,6 +144,8 @@ class Dijkstra:
         its path backwards starting from the target node using the distance table and stores it in the 'all_paths' hash
         table to avoid duplicative calculations.
 
+         **Complexity**:
+
         Time Complexity: O(n)
 
         We will assume the path to target node does not already exist, in which case it would simply be returned from

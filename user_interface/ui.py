@@ -6,6 +6,12 @@ from trucks.trucks import Trucks
 
 
 class UI:
+    """
+    This class represents the UI component of the program.  The user is immediately shown the individual and combined
+    mileage of all trucks, as well as each truck's associated package IDs.  The user then has the option of searching
+    all package statuses at a given time, or individual package's at a given time.
+    """
+
     def __init__(self, packages: Packages, trucks: Trucks):
         self._packages = packages
         self._trucks = trucks

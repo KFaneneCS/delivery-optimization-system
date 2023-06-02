@@ -90,6 +90,8 @@ class PriorityQueue:
         value is less than either child.  This is performed recursively until all nodes are in their proper place.
         This method is called to restore the heap property after changes are made, such as removing nodes.
 
+         **Complexity**:
+
         Time Complexity: O(log(n)).
 
         This method is performed recursively until all nodes are in their proper place.  The worst case is that we
