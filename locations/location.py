@@ -1,6 +1,3 @@
-import bisect
-
-
 class Location:
     """
     A class representing a location consisting of an address, node, and list of adjacent locations and their
@@ -62,4 +59,4 @@ class Location:
         :param target: The target Location object.
         :param weight: The target Location's weight/distance from current Location.
         """
-        bisect.insort(self._adjacency_list, (target, weight), key=lambda adj: adj[1])
+        self._adjacency_list.append((target, weight))

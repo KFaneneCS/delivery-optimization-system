@@ -1,4 +1,3 @@
-import bisect
 from datetime import datetime, timedelta
 
 from data.packages_loader import PackagesLoader
@@ -85,8 +84,8 @@ class Packages:
         """
         if not self._packages_list:
             for _, package in self._packages.items():
-                bisect.insort(self._packages_list, package, key=lambda p: p.id)
-        return self._packages_list
+                self._packages_list.append(package)
+        return sorted(self._packages_list, key=lambda p: p.id)
 
     def get_all_as_table(self):
         """
