@@ -24,6 +24,3 @@ The requirements are as follows:
 ## Usage
 1. Run the main script: 'python main.py'
 2. Follow on-screen prompts to start the simulation. User has the choice to view all packages or a specific package at any given time.
-
-## How to Run
-Briefly explain how employers can run your project locally or access a deployed version. Provide instructions on any setup or configuration required, and any additional steps needed to run your project successfully.
