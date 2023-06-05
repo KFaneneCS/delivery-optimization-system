@@ -40,10 +40,10 @@ class Locations:
         location.
         """
         for source_location, target_location, distance in self.loader.extract_source_target_weights():
-            source_node = self.locations_table[source_location]
-            target_node = self.locations_table[target_location]
-            source_node.value.add_adjacent(target_node.value, distance)
-            target_node.value.add_adjacent(source_node.value, distance)
+            source_loc_obj = self.locations_table[source_location]
+            target_loc_obj = self.locations_table[target_location]
+            source_loc_obj.add_adjacent(target_loc_obj, distance)
+            target_loc_obj.add_adjacent(source_loc_obj, distance)
 
     def _add_all_vertices_and_edges(self):
         """

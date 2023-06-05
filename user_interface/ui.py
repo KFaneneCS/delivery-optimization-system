@@ -75,7 +75,7 @@ class UI:
                 print('Please enter valid Package ID.')
                 return
 
-            curr_package: Package = packages_table[package_id].value
+            curr_package: Package = packages_table[package_id]
 
         except ValueError:
             print('Please enter a valid integer for Package ID.')

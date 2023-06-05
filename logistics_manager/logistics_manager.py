@@ -64,7 +64,7 @@ class LogisticsManager:
         self._graph = self._locations.get_graph()
         self._all_shortest_paths = HashTable()
         self._calculate_all_shortest_paths()
-        self._hub_shortest_paths = self._all_shortest_paths[self._hub].value
+        self._hub_shortest_paths = self._all_shortest_paths[self._hub]
         self._packages = Packages(
             package_csv=packages_file,
             locations=self._locations,
@@ -213,7 +213,7 @@ class LogisticsManager:
                 if not self._packages_by_destination[package.destination]:
                     self._packages_by_destination[package.destination] = [package]
                 else:
-                    self._packages_by_destination[package.destination].value.append(package)
+                    self._packages_by_destination[package.destination].append(package)
             else:
                 self._packages_by_destination['UNKNOWN_DESTINATION'] = package
 
@@ -275,7 +275,7 @@ class LogisticsManager:
         truck_1: Truck = self._trucks.get_truck_by_id(1)
         for package_in_group in self._grouped_packages:
             curr_destination = package_in_group.destination
-            for pckg_with_same_destination in self._packages_by_destination[curr_destination].value:
+            for pckg_with_same_destination in self._packages_by_destination[curr_destination]:
                 if not pckg_with_same_destination.assigned:
                     truck_1.add_assigned_package(pckg_with_same_destination)
                     assigned_packages[pckg_with_same_destination] = truck_1
@@ -284,7 +284,7 @@ class LogisticsManager:
         truck_2: Truck = self._trucks.get_truck_by_id(2)
         for pre_package in truck_2.assigned_packages:
             curr_destination = pre_package.destination
-            for pckg_with_same_destination in self._packages_by_destination[curr_destination].value:
+            for pckg_with_same_destination in self._packages_by_destination[curr_destination]:
                 if not pckg_with_same_destination.assigned:
                     truck_2.add_assigned_package(pckg_with_same_destination)
                     assigned_packages[pckg_with_same_destination] = truck_2
@@ -295,7 +295,7 @@ class LogisticsManager:
         remaining_packages_with_deadline = [p for p in self._packages.get_all_as_list() if
                                             p.deadline and not p.assigned]
         for package_with_deadline in remaining_packages_with_deadline:
-            packages_with_same_destination = self._packages_by_destination[package_with_deadline.destination].value
+            packages_with_same_destination = self._packages_by_destination[package_with_deadline.destination]
             packages_to_add = []
             for pckg in packages_with_same_destination:
                 if not pckg.assigned and pckg not in packages_to_add:
@@ -321,7 +321,7 @@ class LogisticsManager:
         # Assign all remaining packages to trucks where available.
         for package in self._packages.get_all_as_list():
             if not package.assigned and not assigned_packages[package]:
-                group_by_destination = self._packages_by_destination[package.destination].value
+                group_by_destination = self._packages_by_destination[package.destination]
                 truck = get_best_available_truck(group_by_destination)
                 for package_in_group in group_by_destination:
                     if len(group_by_destination) == 1:
@@ -379,7 +379,7 @@ class LogisticsManager:
         if not has_deadlines and curr_truck.packages_queue.get_size() > 1:
             most_recent_packages_loaded, _ = curr_truck.packages_queue.peek_last()
             most_recent_destination = most_recent_packages_loaded[0].destination
-            start_shortest_paths = self._all_shortest_paths[most_recent_destination].value
+            start_shortest_paths = self._all_shortest_paths[most_recent_destination]
             next_closest_loc, distance_to_next = start_shortest_paths.get_closest_from_group(subset)
         else:
             # Find the shortest path within the first subset, starting from the HUB.
@@ -388,7 +388,7 @@ class LogisticsManager:
             curr_time = curr_truck.tracked_current_time
             curr_loc = next_closest_loc
             # Add next closest location to truck's packages linked list if it wouldn't miss deadline.
-            packages_at_next_closest_loc = [p for p in locations_to_packages_table[curr_loc].value
+            packages_at_next_closest_loc = [p for p in locations_to_packages_table[curr_loc]
                                             if not p.has_wrong_address]
             # Efficiency logic to re-assign low-priority packages to the first truck without a driver.
             truck_3: Truck = self._trucks.get_truck_by_id(3)
@@ -403,7 +403,7 @@ class LogisticsManager:
                     curr_truck.remove_assigned_package(package_at_next)
                     truck_3.add_assigned_package(package_at_next)
                 subset.remove(curr_loc)
-                next_shortest_paths = self._all_shortest_paths[curr_loc].value
+                next_shortest_paths = self._all_shortest_paths[curr_loc]
                 next_closest_loc, distance_to_next = next_shortest_paths.get_closest_from_group(subset)
                 continue
 
@@ -428,7 +428,7 @@ class LogisticsManager:
             curr_time += self.calculate_time_from_miles(distance_to_next)
             curr_truck.tracked_current_time = curr_time
 
-            next_shortest_paths = self._all_shortest_paths[curr_loc].value
+            next_shortest_paths = self._all_shortest_paths[curr_loc]
             next_closest_loc, distance_to_next = next_shortest_paths.get_closest_from_group(subset)
 
     def load_packages(self):
@@ -489,7 +489,7 @@ class LogisticsManager:
                 package.destination = self._locations.get_location(CORRECTED_ADDRESS)
 
         def update_travel_distance(prev_location, curr_location):
-            prev_paths = self._all_shortest_paths[prev_location].value
+            prev_paths = self._all_shortest_paths[prev_location]
             path_to_curr = prev_paths.get_shortest_path(curr_location)
             new_travel_distance = path_to_curr[-1][1]
             return new_travel_distance
@@ -549,7 +549,7 @@ class LogisticsManager:
                 continue
 
             # Get path and distance to hub from current location after completing route.
-            paths_from_curr_location = self._all_shortest_paths[curr_location].value
+            paths_from_curr_location = self._all_shortest_paths[curr_location]
             path_to_hub = paths_from_curr_location.get_shortest_path(self._hub)
             distance_to_hub = path_to_hub[-1][1]
 

@@ -92,16 +92,17 @@ class HashTable:
         """
         Returns the node associated with the unhashed key.
         :param unhashed_key: Key associated with node before hashing.
-        :return:
+        :return: The node associated with the unhashed key.
         """
-        return self._get_node(unhashed_key)
+        if self._get_node(unhashed_key):
+            return self._get_node(unhashed_key).value
+        return None
 
     def __setitem__(self, unhashed_key, value):
         """
         Adds node with provided key and value.
         :param unhashed_key: Key to be associated with node prior to hashing.
         :param value: Value to be associated with node.
-        :return:
         """
         self._add_node(unhashed_key, value)
 

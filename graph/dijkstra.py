@@ -138,7 +138,7 @@ class Dijkstra:
         for target_location, _ in self._distance_table.items():
             self.get_shortest_path(target_location)
 
-    def get_shortest_path(self, target):
+    def get_shortest_path(self, target: Location):
         """
         This implementation first checks if the shortest path has already been found previously; if not, it traces
         its path backwards starting from the target node using the distance table and stores it in the 'all_paths' hash
@@ -171,18 +171,15 @@ class Dijkstra:
         both the target node itself and the total weight/traversed distance.
         """
         if self.all_paths.has_node(target):
-            return self.all_paths[target].value
+            return self.all_paths[target]
 
         path = []
-        target_node = self._distance_table[target]
-        shortest_dist = target_node.value[0]
-        path.append((target_node.key, shortest_dist))
-        prev_loc = target_node.value[1]
+        shortest_dist, prev_loc = self._distance_table[target]
+        path.append((target, shortest_dist))
 
         while prev_loc:
             path.append(prev_loc)
-            prev_node = self._distance_table[prev_loc]
-            prev_loc = prev_node.value[1]
+            _, prev_loc = self._distance_table[prev_loc]
 
         path.reverse()
         self.all_paths[target] = path
@@ -194,11 +191,9 @@ class Dijkstra:
         before the target node.  If the shortest path was a direct path from start to target, then the start node would
         be the node last visited before the target node.
         :param target: The target node in the graph.
-        :return: The edge weight and last node in the path to the target node as a tuple.
+        :return: The edge weight and last node in the path to the target as a tuple.
         """
-        node = self._distance_table[target]
-        weight = node.value[0]
-        prev = node.value[1]
+        weight, prev = self._distance_table[target]
         return weight, prev
 
     def get_closest_from_group(self, group: List[Location]):
@@ -211,7 +206,7 @@ class Dijkstra:
         min_distance = math.inf
         curr_closest = None
         for location in group:
-            distance, _ = self._distance_table[location].value
+            distance, _ = self._distance_table[location]
             if distance != 0 and distance < min_distance:
                 min_distance = distance
                 curr_closest = location

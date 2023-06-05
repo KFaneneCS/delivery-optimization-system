@@ -67,7 +67,7 @@ class Packages:
             if not self._location_to_packages_table[destination]:
                 self._location_to_packages_table[destination] = [package]
             else:
-                self._location_to_packages_table[destination].value.append(package)
+                self._location_to_packages_table[destination].append(package)
 
     @property
     def locations_to_packages_table(self):
@@ -105,7 +105,7 @@ class Packages:
         if not isinstance(id_, int):
             raise ValueError('Invalid ID value.')
         try:
-            return self._packages[id_].value
+            return self._packages[id_]
         except KeyError:
             raise KeyError(f'Package with ID {id_} does not exist.')
 

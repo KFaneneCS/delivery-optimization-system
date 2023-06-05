@@ -52,9 +52,9 @@ class Graph:
         :param weight: The value/weight of the edge.
         """
         # Graph node with address as key and (target location, weight) tuple as value
-        source_node = self._graph[source]
+        source_list = self._graph[source]
         source_tuple = (target, weight)
-        source_node.value.append(source_tuple)
+        source_list.append(source_tuple)
 
     def remove_vertex(self, vertex):
         """
@@ -109,8 +109,8 @@ class Graph:
         :param source: The vertex of the weighted edge list being returned.
         :return: The weighted edge list of the passed source vertex.
         """
-        node = self._graph[source]
-        return node.value
+        source_list = self._graph[source]
+        return source_list
 
     def show_all_connections(self):
         """
