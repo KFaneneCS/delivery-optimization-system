@@ -19,7 +19,7 @@ The requirements are as follows:
 ## Technologies Used
 - Programming Language: Python 3.10.5
 - Libraries: (No 3rd party libraries permitted)
-- Development Environemtn: PyCharm 2022.1.4 (Community Edition)
+- Development Environment: PyCharm 2022.1.4 (Community Edition)
 
 ## Usage
 1. Run the main script: 'python main.py'
