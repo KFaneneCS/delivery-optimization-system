@@ -90,20 +90,6 @@ class PriorityQueue:
         value is less than either child.  This is performed recursively until all nodes are in their proper place.
         This method is called to restore the heap property after changes are made, such as removing nodes.
 
-         **Complexity**:
-
-        Time Complexity: O(log(n)).
-
-        This method is performed recursively until all nodes are in their proper place.  The worst case is that we
-        would have to traverse the size of the tree, and as this is a complete binary search tree, the time complexity
-        is therefore O(log(n)).
-
-        Space Complexity:  O(log(n)).
-
-        Each call to "heapify()" contributes a constant amount of marginal space = O(1).  Since the number of recursive
-        calls is, at worst, proportional to the size of the binary search tree, the space complexity is therefore
-        O(log(n)).
-
         :param i: The index of the node to begin the heapify on.
         :param n: The number of elements in the heap.
         """

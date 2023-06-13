@@ -105,21 +105,6 @@ class LogisticsManager:
         """
         Initialization function which uses the Dijkstra implementation to calculate the shortest path for every pair
         of locations.
-
-         **Complexity**:
-
-        Time Complexity: O(n^2 * log(n))
-
-        The primary logic of the Dijkstra implementation is O(n * log(n)).  This method finds all shortest paths for
-        each location = O(n).  Since we iterate through each location and find all shortest paths to every other
-        location using Dijkstra's algorithm:
-        O(n * n * log(n)) = O(n^2 * log(n))
-
-        Space Complexity:  O(n)
-
-        Each iteration contributes constant time complexity = O(1).  The number of iterations equates to the number of
-        locations = O(n).  Therefore, space complexity is O(n).
-
         """
         for location in self._locations.get_all_locations():
             shortest_path = Dijkstra(location, self._graph)
@@ -223,31 +208,6 @@ class LogisticsManager:
         criteria such as package special conditions, truck capacity, deadline considerations, delayed packages, and
         ensuring packages with the same destination are on the same truck where possible.
 
-         **Complexity**:
-
-        Time Complexity: O(t * (p-1)^2)
-
-        Finding an available truck could, worst-case, be necessary for every package.  Since the number of packages
-        is independent of the number of trucks, the time complexity would = O(p * t).  Assigning grouped packages
-        to a given truck would worst-case iterate through each package = O(p).  The worst-case for the rest of the
-        assignment process, though extremely unlikely and far from average case, would be to iterate through each
-        package twice = O((p-1)^2).  For example, if all packages are assigned to "grouped_packages," and they also all
-        happen to have the same destination, then we would iterate through each package and, for each iteration,
-        every other package as well.  Note that this could only occur once, as each subsequent package check would not
-        apply if all packages were already otherwise accounted for and assigned.
-        O((p*t) + p + (p-1)^2) = O(t * (p-1)^2)
-
-        Space Complexity:  O(h + t + p)
-
-        A hash table with default size of 37 is created, which has no direct relationship to the number of packages
-        or trucks, though once the load factor is met there becomes a quasi-direct relationship.  Still,
-        as it is effectively separate, space usage is = O(h).  The "curr_destination" is made for each truck = O(t).
-        The "remaining_packages_with_deadlines" has a worst-case of applying to all packages, so = O(p).  Unlike its
-        time complexity, the nested "for" loops do not add marginal space usage, so they do not contribute to the
-        space complexity. This is because each Package's "assigned" attribute is set to True once assigned, thereby
-        skipping them on subsequent iterations.
-        O(h) + O(t) + O(p) = O(h + t + p)
-
         :raises RuntimeError: If there are no available trucks with capacity when searching for best available truck.
         :raises RuntimeError: If there are no available trucks.
         :raises RuntimeError: If a package's deadline would be missed based on current assignments.
@@ -343,31 +303,6 @@ class LogisticsManager:
         "excessive distance" along its calculated route thus far - that are currently on trucks with drivers, are
         re-assigned and loaded into the first truck without a driver (#3) holding the lowest-priority packages.
 
-        **Complexity**:
-
-        Time Complexity: O(p^2 + l^2)
-
-        This function iterates through each location to determine the optimal path for the current truck = O(l). Getting
-        all packages at the current location would worst-case iterate through all packages = O(p). Iterating through
-        each package is O(p) and, while far from average case, a truck could hold each package, so removing the
-        package via Python's "remove()" method would be O(n), and since that list only holds packages, it is O(p),
-        amounting to O(p^2).  If the bundle comprises all packages, the "load_bundle" method could iterate through
-        each package = O(p).  Retrieving the "next_closest_loc" and "distance_to_next" requires iterating through
-        each location that remains in the subset, and since 1 location is removed each time, the time complexity is
-        O((l * (l + 1)) / 2), or O(l^2).  It is worth noting that this implementation is such that the average case
-        should be significantly more efficient than this.
-        O(l + p + p^2 + l^2) = O(p^2 + l^2)
-
-        Space Complexity: O(l + p)
-
-        Most variables simply access existing values and contribute constant space usage = O(1). Since
-        the "while" loop iterates through each location, the space usage amounts to O(l) accounting for the various
-        constant-space variables within it. While the created pacakge lists could theoretically take up O(p) space, it
-        could only occur at most 1 iteration for each instance since they would no longer meet the conditions on
-        subsequent locations.  However, adding a single package in each instance to truck 3, for example, is possible,
-        therefore we add O(p) to the complexity.
-        O(l + p)
-
         :param subset: The subset of packages (with or without deadlines) to be loaded.
         :param curr_truck: The truck to load the current set of packages onto.
         :param has_deadlines: A boolean which is True if the subset of packages has deadlines, otherwise False.
@@ -455,30 +390,6 @@ class LogisticsManager:
         The package(s) with the initially incorrect destination address has its destination updated at the appropriate
         time.  Any trucks that do not start the day with a driver are loaded once a driver returns from completing
         their route.
-
-        **Complexity**:
-
-        Time Complexity: O(t^2 + p^2 + l^2)
-
-        Initializing truck lists has worst-case O(t).  However, since, worst-case, we iterate through each truck
-        again via the list comprehension, the time complexity with respect to trucks is O(t^2). To complete a route,
-        each truck iterates through their package queue. Iterating through a truck's package queue could contain
-        every package, therefore contributing O(p). However, in that case, we would only iterate through 1 truck,
-        and so the complexity is NOT O(p*t).  Loading packages into the unassigned truck has a time complexity of
-        O(p^2 + l^2) as determined in the "load_packages_subset" method - however, there is effectively no means by
-        which all packages would be assigned to a truck not initially driven, and therefore the worst-case is far
-        from the average-case.  Updating packages with wrong addresses has a worst-case O(p) time complexity,
-        though in practice only 1 package has a wrong address at the time of creating this program. Because each truck
-        must ultimately "grab" and then deliver each package, the package component is O(p^2).
-        O(t^2 + p + (p^2 + l^2) + p) = O(t^2 + p^2 + l^2)
-
-        Space Complexity:  O(t^2 + l + p)
-
-        For each truck iteration, we create a list of trucks without drivers, which has a worst-case space complexity
-        of t^2. Loading the idle truck, as with the time complexity, has a worst-case of O(p) which is far from the
-        average case, and loading the subset of packages is O(l + p) as discovered in "load_packages_subset" method.
-        O(t^2) + O(l + p) = O(t^2 + l + p)
-
         """
 
         def update_wrong_address_packages():
